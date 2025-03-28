@@ -57,8 +57,8 @@ VantComponent({
         init() {
             requestAnimationFrame(() => {
                 Promise.all([
-                    getRect(this, '.van-notice-bar__content'),
-                    getRect(this, '.van-notice-bar__wrap'),
+                    getRect(this, '.van-dynamicNotice-bar__content'),
+                    getRect(this, '.van-dynamicNotice-bar__wrap'),
                 ]).then((rects) => {
                     const [contentRect, wrapRect] = rects;
                     const { speed, scrollable, delay } = this.data;

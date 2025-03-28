@@ -13,22 +13,22 @@
     </view>
 
     <!-- 内容区域 -->
-    <view class="content">
-      <!-- 轮播图 -->
+            <view class="content">
+              <!-- 轮播图 -->
       <view style="margin-bottom: 1rem">
-        <swiper class="banner-swiper"
-                circular
-                autoplay
-                interval="3000"
-                duration="500"
-                indicator-dots
-                indicator-color="rgba(255, 255, 255, 0.3)"
-                indicator-active-color="#ffffff">
-          <swiper-item v-for="(banner, index) in banners" :key="index">
-            <image :src="banner.image" mode="aspectFill"></image>
-          </swiper-item>
-        </swiper>
-      </view>
+              <swiper class="banner-swiper"
+                      circular
+                      autoplay
+                      interval="3000"
+                      duration="500"
+                      indicator-dots
+                      indicator-color="rgba(255, 255, 255, 0.3)"
+                      indicator-active-color="#ffffff">
+                <swiper-item v-for="(banner, index) in banners" :key="index">
+                  <image :src="banner.image" mode="aspectFill"></image>
+                </swiper-item>
+              </swiper>
+            </view>
 
       <!--      瀑布流-->
       <view style="padding:0 2%;margin-bottom: 10vh">
@@ -177,24 +177,11 @@
 <script>
 import BottomNavBar from '@/components/BottomNavBar.vue'
 import tmFlowLayout from '@/tm-vuetify/components/tm-flowLayout/tm-flowLayout.vue'
-import tmFullView from "@/tm-vuetify/components/tm-fullView/tm-fullView.vue"
-import tmMenubars from "@/tm-vuetify/components/tm-menubars/tm-menubars.vue"
-import tmSearch from "@/tm-vuetify/components/tm-search/tm-search.vue"
-import tmActionSheet from "@/tm-vuetify/components/tm-actionSheet/tm-actionSheet.vue"
-import tmButton from "@/tm-vuetify/components/tm-button/tm-button.vue"
-import tmFlotbutton from "@/tm-vuetify/components/tm-flotbutton/tm-flotbutton.vue"
-import tmIcons from "@/tm-vuetify/components/tm-icons/tm-icons.vue"
-import tmLoadding from "@/tm-vuetify/components/tm-loadding/tm-loadding.vue"
-import tmImages from "@/tm-vuetify/components/tm-images/tm-images.vue"
-import tmTags from "@/tm-vuetify/components/tm-tags/tm-tags.vue"
-import tmMenu from "@/tm-vuetify/components/tm-menu/tm-menu.vue"
-import tmSwiper from "@/tm-vuetify/components/tm-swiper/tm-swiper.vue"
+import {BASEURL} from "@/pages/utils/apiconf/image-api";
 
 export default {
   components: {
-    BottomNavBar,
-    tmFullView, tmMenubars, tmSearch, tmActionSheet, tmButton,
-    tmFlotbutton, tmFlowLayout, tmIcons, tmLoadding, tmTags, tmMenu, tmImages, tmSwiper
+    BottomNavBar, tmFlowLayout
   },
   data() {
     return {
@@ -217,6 +204,7 @@ export default {
           title: 'Banner 3'
         }
       ],
+      BASEURL:BASEURL,
       // --------------------------
       keyword: ''
     }
@@ -271,7 +259,6 @@ export default {
     itemClick(e) {
       console.log(e);
       uni.$tm.toast(e.dirIndex + ':' + e.childrenIndex)
-
     },
     del(e) {
       this.$refs.wafll.delItemData(e.dirIndex, e.childrenIndex)
@@ -281,25 +268,25 @@ export default {
       let list2 = [
         {
           size: 20,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "dynamic",
           author: {
-            avatar: "http://121.40.231.89:4443/i/static/avatar.jpg",
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
             name: "测试用户1"
           },
           isLike: false,
           title: "OT | 爱喝野格的小姐姐"
         }, {
           size: 20,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "dynamic"
 
         }, {
           size: 20,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "dynamic",
           author: {
-            avatar: "http://121.40.231.89:4443/i/static/avatar.jpg",
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
             name: "测试用户2"
           },
           isLike: false,
@@ -307,24 +294,24 @@ export default {
 
         }, {
           size: 36,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "group",
           distance: 1.5,
           title: "OT十人局",
           //todo 限制长度为3
           userAvatars: [
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg"
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg'
           ],
           userCount: 5,
           currentCount: 3
         }, {
           size: 20,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "dynamic",
           author: {
-            avatar: "http://121.40.231.89:4443/i/static/avatar.jpg",
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
             name: "测试用户2"
           },
           isLike: false,
@@ -332,10 +319,10 @@ export default {
 
         }, {
           size: 20,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "dynamic",
           author: {
-            avatar: "http://121.40.231.89:4443/i/static/avatar.jpg",
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
             name: "测试用户2"
           },
           isLike: false,
@@ -343,24 +330,24 @@ export default {
 
         }, {
           size: 36,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "group",
           distance: 1.5,
           title: "OT十人局",
           //todo 限制长度为3
           userAvatars: [
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg"
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg'
           ],
           userCount: 5,
           currentCount: 3
         }, {
           size: 20,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "dynamic",
           author: {
-            avatar: "http://121.40.231.89:4443/i/static/avatar.jpg",
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
             name: "测试用户2"
           },
           isLike: false,
@@ -368,10 +355,10 @@ export default {
 
         }, {
           size: 20,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "dynamic",
           author: {
-            avatar: "http://121.40.231.89:4443/i/static/avatar.jpg",
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
             name: "测试用户2"
           },
           isLike: false,
@@ -379,29 +366,29 @@ export default {
 
         }, {
           size: 36,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "group",
           distance: 1.5,
           title: "OT十人局",
           //todo 限制长度为3
           userAvatars: [
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg"
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg'
           ],
           userCount: 5,
           currentCount: 3
         }, {
           size: 36,
-          image: "http://121.40.231.89:4443/i/static/avatar.jpg",
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
           model: "group",
           distance: 1.5,
           title: "OT十人局",
           //todo 限制长度为3
           userAvatars: [
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg",
-            "http://121.40.231.89:4443/i/static/avatar.jpg"
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg'
           ],
           userCount: 5,
           currentCount: 3

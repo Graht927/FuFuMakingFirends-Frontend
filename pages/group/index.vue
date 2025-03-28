@@ -1,3 +1,4 @@
+template
 <template>
   <view class="discover">
     <!-- 顶部状态栏 -->
@@ -17,7 +18,7 @@
           <tm-sheet :shadow="0">
             <tm-calendar black @confirm="commitCalendar">
               <view>
-                <image src="/static/icon/calendar.png"
+                <image src="/static/icon/calendar.png" @click="closeTabBar"
                        style="width: 2rem; height: 2rem;margin-left: 1rem;"/>
               </view>
             </tm-calendar>
@@ -42,8 +43,11 @@
     </scroll-view>
 
     <!-- 内容区域 -->
-    <view class="content" style="height: 70vh;">
-      <view v-if="teamList == null|| teamList.length > 0">
+    <scroll-view id="contentScrollView" class="content"
+                 style="max-height: 69vh;overflow-y: scroll" scroll-y="true"
+                 @scrolltolower="ReachBottom()" @scroll="handlerScroll"
+                 enable-back-to-top="true" :scroll-top="scrollTop">
+      <view v-if="teamList == null || teamList.length > 0">
         <view v-for="event in teamList" :key="event.id">
           <EventCard @goto="toInfoPage()" :event="event"/>
         </view>
@@ -51,17 +55,16 @@
       <view v-else class="no-data">
         <image src="/static/icon/empty.png" mode="aspectFit" class="no-data-image"/>
       </view>
-    </view>
+    </scroll-view>
 
     <!-- 返回顶部按钮 -->
     <view v-if="showBackToTop" class="back-to-top" @click="scrollToTop">
       <image src="/static/icon/back-to-top.png" mode="aspectFit" class="back-to-top-icon"/>
     </view>
-    <BottomNavBar :current-tab="2"/>
-
-
+    <BottomNavBar :current-tab="2" v-if="showTabBar"/>
   </view>
 </template>
+
 
 <script>
 import BottomNavBar from '@/components/BottomNavBar.vue'
@@ -85,10 +88,13 @@ export default {
       selectedDate: new Date(),
       calendar: '',
       teamList: [],
-      showBackToTop: false
+      showBackToTop: false,
+      showTabBar: true,
+      oldScrollTop : 0,
+      scrollTop: 0
     }
   },
-   onLoad() {
+  onLoad() {
     const systemInfo = uni.getSystemInfoSync();
     this.statusBarHeight = systemInfo.statusBarHeight;
     this.generateWeekDates(this.selectedDate);
@@ -145,24 +151,32 @@ export default {
     ]
   },
   methods: {
-    toInfoPage(dataId){
+    handlerScroll(e) {
+      this.showBackToTop = e.detail.scrollTop > 3000;
+      this.oldScrollTop = e.detail.scrollTop;
+    },
+    closeTabBar() {
+      this.showTabBar = false;
+    },
+    toInfoPage(dataId) {
       uni.navigateTo({
         url: '/pages/group/GroupInfo?dataId=' + dataId
-      })
+      });
     },
     commitCalendar(e) {
+      this.showTabBar = true;
       console.log(e);
-      const year = e.year
-      const month = e.month
-      const day = e.day
-      this.generateWeekDates(new Date(year, month - 1, day))
+      const year = e.year;
+      const month = e.month;
+      const day = e.day;
+      this.generateWeekDates(new Date(year, month - 1, day));
     },
     switchTab(index) {
       this.currentTab = index;
     },
     changeDate(index) {
       this.activeDateIndex = index;
-      console.log(this.dates[index])
+      console.log(this.dates[index]);
     },
     generateWeekDates(date) {
       const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -189,7 +203,7 @@ export default {
         duration: 1000
       });
     },
-    onReachBottom() {
+    ReachBottom() {
       console.log("触底了");
       const newEvents = [];
       for (let i = this.teamList.length; i < this.teamList.length + 10; i++) {
@@ -210,22 +224,16 @@ export default {
             'https://ai-public.mastergo.com/ai/img_res/c67f282f0d04c7a58fb612775e4811e0.jpg',
             'https://ai-public.mastergo.com/ai/img_res/c99f9a496d6b56b67a7dcafc873035df.jpg'
           ]
-
         });
       }
       this.teamList = this.teamList.concat(newEvents); // 使用 concat 更新 teamList
-      console.log('teamList:', this.teamList);
     },
     scrollToTop() {
-      uni.pageScrollTo({
-        scrollTop: 0,
-        duration: 300
-      });
+        this.scrollTop = this.oldScrollTop
+      this.$nextTick(()=>{
+        this.scrollTop = 0
+      })
     }
-  },
-  onPageScroll(e) {
-    // 当页面滚动超过一定距离时显示按钮
-    this.showBackToTop = e.scrollTop > 3000;
   }
 }
 </script>
@@ -375,5 +383,9 @@ export default {
 
 .py-32, .px-32 {
   padding: 0;
+}
+
+.data-v-e6d2011a {
+  z-index: 999;
 }
 </style>

@@ -162,9 +162,9 @@ uni-ui支持 HBuilderX直接新建项目模板、npm安装和单独导入个别�
 
 > **注意**
 > cli 项目默认是不编译 `node_modules` 下的组件的，导致条件编译等功能失效 ，导致组件异常
-> 需要在根目录创建 `vue.config.js` 文件 ，增加 `@dcloudio/uni-ui` 包的编译即可正常
+> 需要在根目录创建 `vue.image-sms.js` 文件 ，增加 `@dcloudio/uni-ui` 包的编译即可正常
 > ```javascript
-> // vue.config.js
+> // vue.image-sms.js
 > module.exports = {
 > 		transpileDependencies:['@dcloudio/uni-ui']
 > }
@@ -232,9 +232,9 @@ npm i @dcloudio/uni-ui   或   yarn add @dcloudio/uni-ui
 
  **注意**
  - uni-ui 现在只推荐使用 `easycom` ，如自己引用组件，可能会出现组件找不到的问题
- - 使用 npm 安装的组件，默认情况下 babel-loader 会忽略所有 node_modules 中的文件 ，导致条件编译失效，需要通过配置 `vue.config.js` 解决：
+ - 使用 npm 安装的组件，默认情况下 babel-loader 会忽略所有 node_modules 中的文件 ，导致条件编译失效，需要通过配置 `vue.image-sms.js` 解决：
 	 ```javascript
-	 // 在根目录创建 vue.config.js 文件，并配置如下
+	 // 在根目录创建 vue.image-sms.js 文件，并配置如下
 	 module.exports = {
 		transpileDependencies: ['@dcloudio/uni-ui']
 	 }

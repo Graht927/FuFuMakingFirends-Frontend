@@ -70,10 +70,10 @@
 	 * @property {String}			bgColor			背景颜色 (默认 ''#fdf6ec' )
 	 * @property {String | Number}	fontSize		字体大小，单位px (默认 14 )
 	 * @property {String | Number}	speed			水平滚动时的滚动速度，即每秒滚动多少px(rpx)，这有利于控制文字无论多少时，都能有一个恒定的速度  (默认 80 )
-	 * 
+	 *
 	 * @event {Function} click 点击通告文字触发
 	 * @event {Function} close 点击右侧关闭图标触发
-	 * @example 
+	 * @example
 	 */
 	export default {
 		name: 'uv-row-notice',
@@ -99,7 +99,7 @@
 					// #ifndef APP-NVUE
 					this.vue()
 					// #endif
-					
+
 					if(!this.$uv.test.string(newValue)) {
 						this.$uv.error('noticebar组件direction为row时，要求text参数为字符串形式')
 					}
@@ -176,7 +176,7 @@
 				// #ifndef APP-NVUE
 				this.vue()
 				// #endif
-				
+
 				if(!this.$uv.test.string(this.text)) {
 					this.$uv.error('noticebar组件direction为row时，要求text参数为字符串形式')
 				}
@@ -191,8 +191,8 @@
 				// 查询盒子和文字的宽度
 				textWidth = (await this.$uvGetRect('.uv-notice__content__text')).width
 				boxWidth = (await this.$uvGetRect('.uv-notice__content')).width
-				// 根据t=s/v(时间=路程/速度)，这里为何不需要加上#uv-notice-box的宽度，因为中设置了.uv-notice-content样式中设置了padding-left: 100%
-				// 恰巧计算出来的结果中已经包含了#uv-notice-box的宽度
+				// 根据t=s/v(时间=路程/速度)，这里为何不需要加上#uv-dynamicNotice-box的宽度，因为中设置了.uv-dynamicNotice-content样式中设置了padding-left: 100%
+				// 恰巧计算出来的结果中已经包含了#uv-dynamicNotice-box的宽度
 				this.animationDuration = `${textWidth / this.$uv.getPx(this.speed)}s`
 				// 这里必须这样开始动画，否则在APP上动画速度不会改变
 				this.animationPlayState = 'paused'

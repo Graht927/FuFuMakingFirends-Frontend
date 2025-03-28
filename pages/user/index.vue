@@ -1,72 +1,223 @@
 <template>
   <view class="discover">
     <!-- 顶部状态栏 -->
-    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    <!--    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>-->
 
-    <!-- 标题栏 -->
-    <view class="header">
+    <!--    <view class="header">
       <text class="title">USER</text>
       <view class="indicators">
         <view class="dot"></view>
         <view class="line"></view>
       </view>
-    </view>
-    <template>
-      <div :style="{height:'60vh',overflow: 'auto'}">
+        </view>-->
+    <div :style="{height:'30vh',overflow: 'auto'}">
         <!--用户头像-->
+      <div
+          :style="{width: '100%',height: '100%',backgroundImage:
+          'url('+`${userInfo.avatarUrl!=null? userInfo.avatarUrl:defaultAvatarUrl}`+')',backgroundPosition:'center',backgroundSize:'cover'}">
         <div
-            :style="{width: '100%',height: '40%',backgroundImage: 'url('+`${userInfo.avatarUrl!=null? userInfo.avatarUrl:defaultAvatarUrl}`+')',backgroundPosition:'center',backgroundSize:'cover'}">
-          <div
-              style="height: 100%;width: 100%;backdrop-filter: blur(5px);display: flex;justify-content: center;align-items: center;text-align: center">
-            <!-- 左侧标签区域 -->
-            <view class="tag-area left-tags">
-              <view
-                  v-for="(tag, index) in tags"
-                  :key="index"
-                  class="tag"
-                  :style="{
-                    backgroundColor: tag.color,
-                    left: `${tag.left}%`, // 随机水平位置
-                    top: `${tag.top}%`, // 随机垂直位置
-                  }"
-                  @click="clickTag(tag)"
-              >
-                {{ tag.text }}
-              </view>
-            </view>
+            style="height: 100%;width: 100%;backdrop-filter: blur(5px);">
+          <div style="padding-top: 10%;display: flex">
             <van-image
                 round
-                width="6.5rem"
-                height="6.5rem"
-                style="z-index: 2;position: absolute; top: 10%;"
-                :src="userInfo.avatarUrl!=''?userInfo.avatarUrl:'http://121.40.231.89:4443/i/static/avatar1.jpg'"
+                width="6rem"
+                height="6rem"
+                style="padding-left: 2rem"
+                :src="userInfo.avatarUrl!=''? userInfo.avatarUrl :this.BASEURL +'/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg'"
             />
+            <div style="margin-left: 1.2rem">
+              <span
+                  style="display:inline-block;color:white;font-size: 1.2rem;font-weight: 400;width: 30vw;line-height: 6rem">
+                {{ userInfo.nickname }}
+              </span>
+            </div>
+          </div>
+          <!--            底部-->
+          <div style="width: 100%;height: 10vh;position: absolute;bottom: 0;overflow: hidden">
+            <div style="padding: 0 1rem;">
+              <div v-for="tag in tags" :key="tag.text"
+                   style="display:inline-block;height: 1.2rem;color: #f5e9e9;border: 1px solid #312f2f;
+                    border-radius: 1.2rem;padding: 0.2rem 0.5rem;font-size: 0.8rem;background:#59483d;opacity: 0.7;
+                    margin: 0.4rem">
+                {{ tag }}
+              </div>
+            </div>
           </div>
         </div>
-        <div style="color:white">
-          <van-tabs v-model:active="contextActive" swipeable @change="onChange">
-            <van-tab v-for="item in contextInfo" :title="item.title" :key="item.title">
-              <team-card-list @reloadPage="delReloadPage" :team-list="teamList" :listProp="listProp"/>
-            </van-tab>
-          </van-tabs>
+      </div>
+    </div>
+
+    <div style="color:white;max-height: 70vh;">
+      <div style="display: flex;padding-left: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem">
+        <div
+            style="width: 3rem;height: 1.2rem;padding: 0.2rem 0.5rem;border-radius: 0.3rem;background:#2d2d2d;margin: 0.4rem;text-align: center"
+            :style="{color: '#c0bebe' }" v-if="clickTag != '动态'" @click="clickTag = '动态'">
+          动态
+        </div>
+        <div
+            style="width: 3rem;height: 1.2rem;padding: 0.2rem 0.5rem;border-radius: 0.3rem;background:#e3e3e3;margin: 0.4rem;text-align: center"
+            :style="{color: '#414040' }" v-if="clickTag === '动态'">
+          动态
+        </div>
+        <div
+            style="width: 3rem;height: 1.2rem;padding: 0.2rem 0.5rem;border-radius: 0.3rem;background:#2d2d2d;margin: 0.4rem;text-align: center"
+            :style="{color: '#c0bebe'}" v-if="clickTag != '活动'" @click="clickTag = '活动'">
+          活动
+        </div>
+        <div
+            style="width: 3rem;height: 1.2rem;padding: 0.2rem 0.5rem;border-radius: 0.3rem;background:#e3e3e3;margin: 0.4rem;text-align: center"
+            :style="{color: '#414040' }" v-if="clickTag === '活动'">
+          活动
         </div>
       </div>
+      <scroll-view style="max-height: 52vh;overflow-y: scroll"
+                   id="contentScrollView" class="content" scroll-y="true"
+                   @scrolltolower="ReachBottom()" @scroll="handlerScroll"
+                   enable-back-to-top="true" :scroll-top="scrollTop"
+      >
+        <tm-flowLayout v-show="clickTag === '动态'" @click="itemClick" ref="wafll1">
+          <template v-slot:left="{hdata}">
+            <view class="shadow-2 overflow">
+              <block v-if="hdata && hdata.item && hdata.item.model === 'dynamic'">
+                <image :src="hdata.item.image" style="border-radius: 0.5rem;width: 100%"
+                       :style="{height: hdata.item.size + 'vh'}"/>
+              </block>
+            </view>
+          </template>
+          <template v-slot:right="{hdata}">
+            <view class="shadow-2 overflow">
+              <block v-if="hdata && hdata.item && hdata.item.model === 'dynamic'">
+                <image :src="hdata.item.image" style="border-radius: 0.5rem;width: 100%"
+                       :style="{height: hdata.item.size+ 'vh'}"/>
+              </block>
+            </view>
+          </template>
+        </tm-flowLayout>
+        <tm-flowLayout v-show="clickTag === '活动'" @click="itemClick" ref="wafll2">
+          <template v-slot:left="{hdata}">
+            <view class="round-3 shadow-2 overflow">
+              <block v-if="hdata.item.model==='group'">
+                <view style="position:relative;" :style="{height:hdata.item.size+'vh'}">
+                  <view
+                      :style="{backgroundImage:`url(${hdata.item.image})`,filter:'blur(10px)'
+                      ,height:`${hdata.item.height}px`,backgroundSize:'cover',backgroundPosition:'center'}">
+                  </view>
+                  <view
+                      style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: flex-end;">
+                    <view
+                        style="padding:1rem 1.2rem;border-radius: 1rem;">
+                      <image :src="hdata.item.image"
+                             style="width: 8rem; height: 8rem; border: 2px solid #dadada;border-radius: 1rem;
+                              position: absolute;z-index: 1;top: 2rem;left: 1.3rem"/>
+                      <image :src="hdata.item.image"
+                             style="width: 7rem; height: 7rem; border: 2px solid #dadada;border-radius: 1rem;position: relative;left: 1.7rem;top: -2.5rem;
+                          "/>
+                    </view>
+                    <view style="text-align: center;position:relative;top: -1.4rem">
+                      <view style="display: flex;justify-content: center">
+                        <image src="/static/icon/tip.png"
+                               style="width: 1.5rem; height: 1.5rem; margin-right: 0.2rem;"></image>
+                        <text style="color: white; font-size: 1rem; display: block;">OT十人局</text>
+                      </view>
+                      <text style="font-size: 0.8rem; display: block;color: #ccc">距离您{{ hdata.item.distance }}km |
+                        正在报名
+                      </text>
+                      <view
+                          style="display: flex;justify-content: space-around; align-items: center; margin: 0.5rem auto 0; background-color: rgba(0,0,0,.5);height: 2.2rem;width: 80%;border-radius: 2.2rem">
+                        <view style="display: flex; align-items: center;">
+                          <image v-for="(participant, index) in hdata.item.userAvatars" :key="index" :src="participant"
+                                 style="width: 1.3rem; height: 1.3rem; border-radius: 50%; margin-right: -0.2rem;"/>
+                        </view>
+                        <span style="color: white; font-size: 0.8rem;">{{ hdata.item.currentCount }}人参与</span>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </template>
+          <template v-slot:right="{hdata}">
+            <view class="round-3 shadow-2 overflow">
+              <block v-if="hdata.item.model==='group'">
+                <view style="position:relative;" :style="{height:hdata.item.size+'vh'}">
+                  <view
+                      :style="{backgroundImage:`url(${hdata.item.image})`,filter:'blur(10px)'
+                      ,height:`${hdata.item.height}px`,backgroundSize:'cover',backgroundPosition:'center'}">
+                  </view>
+                  <view
+                      style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: flex-end;">
+                    <view
+                        style="padding:1rem 1.2rem;border-radius: 1rem;">
+                      <image :src="hdata.item.image"
+                             style="width: 8rem; height: 8rem; border: 2px solid #dadada;border-radius: 1rem;
+                              position: absolute;z-index: 1;top: 2rem;left: 1.3rem"/>
+                      <image :src="hdata.item.image"
+                             style="width: 7rem; height: 7rem; border: 2px solid #dadada;border-radius: 1rem;position: relative;left: 1.7rem;top: -2.5rem;
+                          "/>
+                    </view>
+                    <view style="text-align: center;position:relative;top: -1.4rem">
+                      <view style="display: flex;justify-content: center">
+                        <image src="/static/icon/tip.png"
+                               style="width: 1.5rem; height: 1.5rem; margin-right: 0.2rem;"></image>
+                        <text style="color: white; font-size: 1rem; display: block;">OT十人局</text>
+                      </view>
+                      <text style="font-size: 0.8rem; display: block;color: #ccc">距离您{{ hdata.item.distance }}km |
+                        正在报名
+                      </text>
+                      <view
+                          style="display: flex;justify-content: space-around; align-items: center; margin: 0.5rem auto 0; background-color: rgba(0,0,0,.5);height: 2.2rem;width: 80%;border-radius: 2.2rem">
+                        <view style="display: flex; align-items: center;">
+                          <image v-for="(participant, index) in hdata.item.userAvatars" :key="index" :src="participant"
+                                 style="width: 1.3rem; height: 1.3rem; border-radius: 50%; margin-right: -0.2rem;"/>
+                        </view>
+                        <span style="color: white; font-size: 0.8rem;">{{ hdata.item.currentCount }}人参与</span>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </block>
+            </view>
     </template>
+        </tm-flowLayout>
+      </scroll-view>
+    </div>
+    <!-- 返回顶部按钮 -->
+    <view v-if="showBackToTop" class="back-to-top" @click="scrollToTop">
+      <image src="/static/icon/back-to-top.png" mode="aspectFit" class="back-to-top-icon"/>
+    </view>
     <BottomNavBar :current-tab="4"/>
-
   </view>
 </template>
+
 
 <script>
 import GCard from '@/components/GCard.vue'
 import BottomNavBar from '@/components/BottomNavBar.vue'
-import GWaterFall from "@/components/GWaterFall.vue";
+import {getUserInfoByUId} from "@/pages/utils/apis/user";
+import tmFullView from "@/tm-vuetify/components/tm-fullView/tm-fullView.vue";
+import tmMenubars from "@/tm-vuetify/components/tm-menubars/tm-menubars.vue";
+import tmSearch from "@/tm-vuetify/components/tm-search/tm-search.vue";
+import tmActionSheet from "@/tm-vuetify/components/tm-actionSheet/tm-actionSheet.vue";
+import tmButton from "@/tm-vuetify/components/tm-button/tm-button.vue";
+import tmFlotbutton from "@/tm-vuetify/components/tm-flotbutton/tm-flotbutton.vue";
+import tmFlowLayout from "@/tm-vuetify/components/tm-flowLayout/tm-flowLayout.vue";
+import tmIcons from "@/tm-vuetify/components/tm-icons/tm-icons.vue";
+import tmLoadding from "@/tm-vuetify/components/tm-loadding/tm-loadding.vue";
+import tmTags from "@/tm-vuetify/components/tm-tags/tm-tags.vue";
+import tmMenu from "@/tm-vuetify/components/tm-menu/tm-menu.vue";
+import tmImages from "@/tm-vuetify/components/tm-images/tm-images.vue";
+import tmSwiper from "@/tm-vuetify/components/tm-swiper/tm-swiper.vue";
+import {BASEURL} from "@/pages/utils/apiconf/image-api";
+import {getDynamicsByUserId} from "@/pages/utils/apis/user/dynamic";
+import Random from "@/tm-vuetify/tool/function/random";
+import random from "@/tm-vuetify/tool/function/random";
 
 export default {
   components: {
-    GWaterFall,
     GCard,
-    BottomNavBar
+    BottomNavBar,
+    tmFullView, tmMenubars, tmSearch, tmActionSheet, tmButton,
+    tmFlotbutton, tmFlowLayout, tmIcons, tmLoadding, tmTags, tmMenu, tmImages, tmSwiper
   },
   data() {
     return {
@@ -77,350 +228,293 @@ export default {
         {title: '已创建房间'},
         {title: '过期房间'}
       ],
-      defaultAvatarUrl: 'http://121.40.231.89:4443/i/static/avatar1.jpg',
-      userInfo: {
-        avatarUrl: 'http://121.40.231.89:4443/i/static/avatar1.jpg'
-      },
+      defaultAvatarUrl: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+      userInfo: {},
       tags: [], // 初始化空标签数组
-      teamList: [],
+      dynamics: [],
+      groups: [],
+      BASEURL: BASEURL,
       listProp: 0,
-      gap: 12,
-      column: 2,
-      loading: false,
-      isfinish: false,
-      itemWidth: 0,
-      itemList: [],
-      contentRef: null,
-      columnHeight: [],
-      ItemPos: [],
-      scrollTop: 0,
-      isLoading: false,
-      isLoadingOver: false,
-      testW: null,
-      waterfallContentWidth: null,
       statusBarHeight: 0,
-      currentTab: 0,
-      buttonPosition: {top: 500, left: 0},
-      startTouch: {x: 0, y: 0},
-      screenWidth: 0,
-      screenHeight: 0,
       systemInfo: uni.getSystemInfoSync(),
+      clickTag: "动态",
+      // ====================================
+      pageSize: 10,
+      pageCount: 1,
+      oldScrollTop: 0,
+      scrollTop: 0,
+      showBackToTop: false,
     }
   },
   onLoad() {
+    this.getUserInfo()
+    // this.randouh()
+    this.getDynamicData()
     const systemInfo = uni.getSystemInfoSync();
     this.statusBarHeight = systemInfo.statusBarHeight;
     this.screenWidth = systemInfo.windowWidth;
     this.screenHeight = systemInfo.windowHeight;
-    // 设置初始位置在屏幕右侧边缘
-    this.buttonPosition = {
-      top: 500, // 可以根据需要调整初始的垂直位置
-      left: this.screenWidth - 60  // 按钮宽度
-    };
-    // 生成随机标签位置
-    this.generateTags(12);
   },
   computed: {},
   mounted() {
     // 获取系统信息
     console.log(this.systemInfo)
-    this.waterfallContentWidth = this.systemInfo.windowWidth - 30
-    this.init()
-    console.log(this.itemList)
     // 监听滚动
-  },
-  watch: {
-    scrollTop() {
-      this.onBottom()
-    }
+
   },
   methods: {
-    // 生成固定标签位置（凌乱风格）
-    generateTags(count) {
-      const maxTags = 6; // 最多显示6个标签
-      const fixedPositions = [
-        // 左侧位置
-        { left: 5, top: 15 },   // 更靠近左侧，稍微偏上
-        { left: 15, top: 40 },  // 稍微偏右，中间偏上
-        { left: 10, top: 65 },  // 中间偏左，稍微偏下
-        // 右侧位置
-        { left: 75, top: 20 },  // 更靠近右侧，稍微偏上
-        { left: 70, top: 45 },  // 稍微偏右，中间偏上
-        { left: 67, top: 70 },  // 中间偏右，稍微偏下
-      ];
-
-      // 限制标签数量
-      count = Math.min(count, maxTags);
-
-      const tags = fixedPositions.slice(0, count).map((pos, index) => ({
-        text: `标签${index + 1}大苏打的`,
-        color: this.getRandomColor(),
-        left: pos.left,
-        top: pos.top,
-      }));
-
-      this.tags = tags;
-    },
-
-    // 获取随机颜色
-    getRandomColor() {
-      const colors = ["#ffcc00", "#00ccff", "#ff6666", "#66cc66", "#cc66ff", "#ff9966"];
-      return colors[Math.floor(Math.random() * colors.length)];
-    },
-    // 处理标签点击事件
-    clickTag(tag) {
-      console.log('点击了标签:', tag.text);
-      uni.showToast({
-        title: `点击了: ${tag.text}`,
-        icon: 'none'
-      });
-    },
-    async onChange(v) {
-      if (v == 0) {
-        //todo 动态
-        teamList.value = []
-      }
-      if (v == 1) {
-        const res = await getAddTeamList();
-        if (res.code === 20000) {
-          teamList.value = res.data
-          listProp.value = 1
-        }
-      }
-      if (v == 2) {
-        const res = await getCreateTeamList();
-        if (res.code === 20000) {
-          teamList.value = res.data
-          listProp.value = 2
-        }
-      }
-      if (v == 3) {
-        const res = await getExpireTeamList();
-        if (res.code === 20000) {
-          teamList.value = res.data
-          listProp.value = 3
-        }
+    ReachBottom() {
+      if (this.clickTag === '动态') {
+        console.log("动态")
+        this.getDynamicData()
       }
     },
-    async delReloadPage(data) {
-      if (data == 0) {
-        //todo 动态
-      }
-      if (data == 1) {
-        const res = await getAddTeamList();
-        if (res.code === 20000) {
-          teamList.value = res.data
-          listProp.value = 1
-        }
-      }
-      if (data == 2) {
-        const res = await getCreateTeamList();
-        if (res.code === 20000) {
-          teamList.value = res.data
-          listProp.value = 2
-        }
-      }
-      if (data == 3) {
-        const res = await getExpireTeamList();
-        if (res.code === 20000) {
-          teamList.value = res.data
-          listProp.value = 3
-        }
-      }
+    baseUrl(e) {
+      console.log(e)
+      return BASEURL + e
     },
-    min() {
-      let minIndex = -1, minHeight = Infinity;
-      for (let i = 0; i < this.columnHeight.length; i++) {
-        const h = this.columnHeight[i]
-        if (h < minHeight) {
-          minIndex = i
-          minHeight = h
-        }
-      }
-      return {minIndex, minHeight}
+    random(min, max) {
+      return Math.random() * (max - min) + min;
     },
-    getItemList(nums, isFirst) {
-      if (!this.isfinish) {
-        this.loading = true
-        let users = null;
-        if (nums === 20) users = this.getData(nums)
-        else users = [
-          {
-            id: 4,
-            width: 40,
-            height: 32,
-            avatarUrl: '/static/avatars/avatar2.jpg',
-            title: '音乐分享',
-            description: '来听听我的歌'
-          },
-          {
-            id: 5,
-            width: 40,
-            height: 32,
-            avatarUrl: '/static/avatars/avatar2.jpg',
-            title: '音乐分享',
-            description: '来听听我的歌'
-          }]
-        const newUsers = users.filter(user => {
-          return !this.itemList.some(item => item.id === user.id)
-        })
-
-        if (!newUsers.length) {
-          this.isfinish = true
-          return
-        }
-        newUsers.forEach((user) => {
-          const domWidth = this.systemInfo.windowWidth
-          const domHeight = this.systemInfo.windowHeight
-          user.width = (user.width / 100) * domWidth
-          user.height = (user.height / 100) * domHeight
-          console.log(user)
-        })
-        this.computedItemPosition(newUsers, isFirst)
-        this.loading = false
-        this.itemList = [...this.itemList, ...newUsers]
-      }
+    handlerScroll(e) {
+      this.showBackToTop = e.detail.scrollTop > 1000;
+      this.oldScrollTop = e.detail.scrollTop;
     },
-    async init() {
+    randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+    getDynamicData() {
+      const data = {
+        pageSize: this.pageSize,
+        pageNum: this.pageCount,
+        uid: uni.getStorageSync("fufu-app-userId")
+      }
       const that = this
-      this.itemWidth = (this.waterfallContentWidth - (this.column - 1) * this.gap) / this.column
-      this.getItemList(20, true);
-    },
-    computedItemPosition(list, isFirst) {
-      list.forEach((item, index) => {
-        const itemHeight = Math.floor((item.height * this.itemWidth) / item.width)
-        if (isFirst && index < this.column) {
-          //第一行
-          this.ItemPos.push({
-            y: 200,
-            x: index % this.column !== 0 ? index * this.itemWidth + this.gap * index : index * this.itemWidth,
-          })
-          this.columnHeight.push(itemHeight + 180 + this.gap)
-        } else {
-          const {minIndex, minHeight} = this.min();
-          this.ItemPos.push({
-            x: minIndex % this.column !== 0 ? minIndex * this.itemWidth + this.gap * minIndex : minIndex * this.itemWidth,
-            y: minHeight
-          });
-          this.columnHeight[minIndex] += itemHeight + this.gap;
+      getDynamicsByUserId(data).then(res => {
+        if (res.code === 20000) {
+          if (res.data.length > 0) {
+            let dynamics = res.data
+            /*[
+              {
+                size: 26,
+                image: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                model: "dynamic",
+                author: {
+                  avatar: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                  name: "测试用户1"
+                },
+                isLike: false,
+                title: "OT | 爱喝野格的小姐姐"
+              }, {
+                size: 26,
+                image: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                model: "dynamic",
+                author: {
+                  avatar: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                  name: "测试用户2"
+                },
+                isLike: false,
+                title: "OT | 爱抽瑞克五代的顶针"
+
+              }, {
+                size: 26,
+                image: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                model: "dynamic",
+                author: {
+                  avatar: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                  name: "测试用户2"
+                },
+                isLike: false,
+                title: "OT | 爱抽瑞克五代的顶针"
+
+              }, {
+                size: 26,
+                image: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                model: "dynamic",
+                author: {
+                  avatar: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                  name: "测试用户2"
+                },
+                isLike: false,
+                title: "OT | 爱抽瑞克五代的顶针"
+
+              }, {
+                size: 26,
+                image: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                model: "dynamic",
+                author: {
+                  avatar: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                  name: "测试用户2"
+                },
+                isLike: false,
+                title: "OT | 爱抽瑞克五代的顶针"
+              }, {
+                size: 26,
+                image: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                model: "dynamic",
+                author: {
+                  avatar: '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+                  name: "测试用户2"
+                },
+                isLike: false,
+                title: "OT | 爱抽瑞克五代的顶针"
+              }
+            ];*/
+            dynamics.map((item, index) => {
+              item.size = item.size + this.randomInt(-1, 4)
+              item.image = this.BASEURL + item.image
+              item.author.avatar = this.BASEURL + item.author.avatar
+            })
+            this.$nextTick(function () {
+              this.$refs.wafll1.pushData(dynamics)
+            })
+          }
+          this.pageCount++
         }
       })
     },
+    itemClick(e) {
+      console.log(e);
+      uni.$tm.toast(e.dirIndex + ':' + e.childrenIndex)
+    },
+    //模拟数据，添加到列表中。
+    async randouh() {
+      let dynamics = [
+        {
+          size: 26,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "dynamic",
+          author: {
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            name: "测试用户1"
+          },
+          isLike: false,
+          title: "OT | 爱喝野格的小姐姐"
+        }, {
+          size: 26,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "dynamic",
+          author: {
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            name: "测试用户2"
+          },
+          isLike: false,
+          title: "OT | 爱抽瑞克五代的顶针"
 
-    onBottom() {
-      console.log("触底逻辑")
-      if (!this.isLoading) {
-        this.isLoading = true
-        console.log('触底了')
-        //todo 触底逻辑
-        this.getItemList(15, false)
-        this.isLoading = false
-        setTimeout(() => {
-          this.isLoadingOver = true
-        }, 1000)
-      }
-    },
-    onTouchStart(e) {
-      this.startTouch = {
-        x: e.touches[0].pageX - this.buttonPosition.left,
-        y: e.touches[0].pageY - this.buttonPosition.top
-      };
-    },
-    onTouchMove(e) {
-      const newLeft = e.touches[0].pageX - this.startTouch.x;
-      const newTop = e.touches[0].pageY - this.startTouch.y;
+        }, {
+          size: 26,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "dynamic",
+          author: {
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            name: "测试用户2"
+          },
+          isLike: false,
+          title: "OT | 爱抽瑞克五代的顶针"
 
-      // 限制按钮在屏幕内
-      const maxLeft = this.screenWidth - 60; // 按钮宽度
-      const maxTop = this.screenHeight - 60; // 按钮高度
+        }, {
+          size: 26,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "dynamic",
+          author: {
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            name: "测试用户2"
+          },
+          isLike: false,
+          title: "OT | 爱抽瑞克五代的顶针"
 
-      this.buttonPosition.left = Math.max(0, Math.min(newLeft, maxLeft));
-      this.buttonPosition.top = Math.max(0, Math.min(newTop, maxTop));
-    },
-    onTouchEnd() {
-      console.log('Touch End');
-      // 可以在这里添加其他逻辑
-    },
-    switchTab(index) {
-      this.currentTab = index;
-    },
-    getData(nums) {
-      return [{
-        id: 1,
-        width: 40,  // 宽度百分比
-        height: 32, // 高度百分比
-        avatarUrl: '/static/avatars/avatar1.jpg',
-        title: 'OT十人局',
-        description: '距离5.2km | 在线播放'
-      },
+        }, {
+          size: 26,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "dynamic",
+          author: {
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            name: "测试用户2"
+          },
+          isLike: false,
+          title: "OT | 爱抽瑞克五代的顶针"
+        }, {
+          size: 26,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "dynamic",
+          author: {
+            avatar: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            name: "测试用户2"
+          },
+          isLike: false,
+          title: "OT | 爱抽瑞克五代的顶针"
+        }
+      ];
+      let groups = [
         {
-          id: 2,
-          width: 40,
-          height: 32,
-          avatarUrl: '/static/avatars/avatar2.jpg',
-          title: '音乐分享',
-          description: '来听听我的歌'
+          size: 36,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "group",
+          distance: 1.5,
+          title: "OT十人局",
+          //todo 限制长度为3
+          userAvatars: [
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg'
+          ],
+          userCount: 5,
+          currentCount: 3
+        }, {
+          size: 36,
+          image: this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+          model: "group",
+          distance: 1.5,
+          title: "OT十人局",
+          //todo 限制长度为3
+          userAvatars: [
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg',
+            this.BASEURL + '/2025/03/23/f7afe779-8cf0-4253-a1a5-a918f4e61256.jpg'
+          ],
+          userCount: 5,
+          currentCount: 3
         },
-        {
-          id: 3,
-          width: 40,
-          height: 32,
-          avatarUrl: '/static/avatars/avatar2.jpg',
-          title: '音乐分享',
-          description: '来听听我的歌'
-        },
-        {
-          id: 6,
-          width: 40,
-          height: 32,
-          avatarUrl: '/static/avatars/avatar2.jpg',
-          title: '音乐分享',
-          description: '来听听我的歌'
-        },
-        {
-          id: 7,
-          width: 40,
-          height: 32,
-          avatarUrl: '/static/avatars/avatar2.jpg',
-          title: '音乐分享',
-          description: '来听听我的歌'
-        }]
-    },
-    fetchWaterfallData(nums) {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            code: 20000,
-            data: this.waterfallData
-          })
-        }, 500)
+      ]
+      this.$nextTick(function () {
+        this.$refs.wafll1.pushData(dynamics)
+        this.$refs.wafll2.pushData(groups)
       })
     },
-    handleTagClick(tag) {
-      // 处理标签点击事件
-      console.log('Tag clicked:', tag);
+    getUserInfo() {
+      var uid = uni.getStorageSync("fufu-app-userId");
+      if (uid === "") {
+        uni.redirectTo({
+          url: '/pages/Login'
+        })
+      }
+      getUserInfoByUId(uid).then(res => {
+        console.log(res)
+        if (res.code === 20000) {
+          this.userInfo = res.data
+          if (res.data.tags) {
+            console.log(res.data.tags)
+            this.tags = res.data.tags.slice(2, -2).toString().split(',').map(tag => tag.trim().replace(/"/g, ''))
+          }
+          this.userInfo.avatarUrl = this.BASEURL + this.userInfo.avatarUrl
+        } else {
+          uni.showToast({
+            title: '获取用户信息失败',
+            icon: 'none'
+          })
+          uni.redirectTo({
+            url: '/pages/Login'
+          })
+        }
+      })
+    },
+    scrollToTop() {
+      this.scrollTop = this.oldScrollTop
+      this.$nextTick(() => {
+        this.scrollTop = 0
+      })
     }
   }
-  , onReachBottom() {
-    console.log("触底了")
-    if (!this.isLoading) {
-      console.log(this.systemInfo.clientHeight + this.scrollTop >= this.systemInfo.scrollHeight)
-      console.log(this.systemInfo.clientHeight)
-      console.log(this.scrollTop)
-      console.log(this.systemInfo.scrollHeight)
-      if (this.systemInfo.clientHeight + this.scrollTop >= this.systemInfo.scrollHeight) {
-        this.isLoading = true
-        console.log('触底了')
-        //todo触底逻辑
-        console.log("触底逻辑")
-        this.getItemList(15, false)
-        this.isLoading = false
-        setTimeout(() => {
-          this.isLoadingOver = true
-        }, 1000)
-      }
-    }
-  },
 }
 </script>
 
@@ -488,6 +582,26 @@ export default {
 
 .van-tabs__nav {
   background: #000;
+}
+
+.back-to-top {
+  position: fixed;
+  right: 20rpx;
+  bottom: 18vh; // 避免与底部导航栏重叠
+  width: 80rpx;
+  height: 80rpx;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+
+  .back-to-top-icon {
+    width: 40rpx;
+    height: 40rpx;
+  }
 }
 
 .van-ellipsis {

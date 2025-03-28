@@ -5,8 +5,8 @@
 				<tm-images  @error="loadimg($event,false,index)"  @load="loadimg($event,true,index)"  :src="item.image"></tm-images>
 			</view>
 		</view>
-		<view class="tm-flowLayout-cm flex-between">
-			<view class="tm-flowLayout-left" style="width: 48.6%;">
+		<view class="tm-flowLayout-cm flex-around">
+			<view class="tm-flowLayout-left" style="width: 48%;">
 				<block v-for="(item, index) in dataList[0]" :key="index">
 					<view @click.stop="onclick(index,0)" class="tm-flowLayout-item mb-20 fulled" :class="['tm-flowLayout-item_'+index]" >
 						<slot name="left" :hdata="{item:item,dirIndex:0,childrenIndex:index}">
@@ -15,7 +15,7 @@
 					</view>
 				</block>
 			</view>
-			<view class="tm-flowLayout-right" style="width: 48.6%;">
+			<view class="tm-flowLayout-right" style="width: 48%;">
 				<block v-for="(item, index) in dataList[1]" :key="index">
 					<view @click.stop="onclick(index,1)" class="tm-flowLayout-item mb-20 fulled"  :class="['tm-flowLayout-item_'+index]">
 						<slot name="right" :hdata="{item:item,dirIndex:1,childrenIndex:index}">
@@ -24,16 +24,16 @@
 					</view>
 				</block>
 			</view>
-			
+
 		</view>
 		<view v-if="isLoading" class="flex-shrink fulled">
-			<tm-loadding></tm-loadding>
+<!--			<tm-loadding></tm-loadding>-->
 		</view>
 	</view>
 </template>
 
 <script>
-	
+
 	/**
 	 * 瀑布流组件
 	 * @property {Function} click 点击项目时触发
@@ -67,7 +67,7 @@
 		let p = await this.$Querey('.tm-flowLayout-left').catch(e=>{});
 		this.minWidth = p[0].width;
 	},
-	
+
 	methods: {
 		onclick(index,dirIndex){
 			this.$emit('click',
@@ -86,7 +86,7 @@
 			this.colHeight.splice(dirIndex,1,this.colHeight[dirIndex] - this.dataList[dirIndex][childrenIndex].height)
 			this.dataList[dirIndex].splice(childrenIndex,1);
 			this.list2.splice(this.dataList[dirIndex][childrenIndex].index,1);
-			
+
 			this.$nextTick(function(){
 				this.sucessRank();
 			})
@@ -113,7 +113,7 @@
 			return this.dataList;
 		},
 		async loadimg(event,isLoad,index) {
-			
+
 			// console.log(event,index);
 			this.isLoading = true;
 			let ps = this.list2[index];
@@ -121,7 +121,7 @@
 			if(isLoad==false){
 				ps.width = this.minWidth;
 				ps.height = this.minWidth;
-				
+
 			}else{
 				ps.width = this.minWidth;
 				ps.height = ps.height+event.height;
@@ -164,7 +164,7 @@
 				this.dataList[index].push(this.list2[i]);
 				this.colHeight.splice(index,1,this.colHeight[index]+this.list2[i].height)
 			}
-			
+
 		},
 		//清空瀑布流数据 。
 		clear(){
@@ -183,7 +183,7 @@
 				})
 			})
 		}
-			
+
 	},
 };
 </script>
@@ -200,7 +200,7 @@
 	.tm-flowLayout-cm{
 		align-items: flex-start;
 	}
-	
-	
+
+
 }
 </style>

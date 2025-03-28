@@ -1,6 +1,6 @@
 <template>
 	<view class="tm-password ">
-		
+
 		<view @click="show=!show" class="flex-center flex-between">
 			<view class="tm-password-item flex-center  "
 			 :class="[
@@ -10,9 +10,9 @@
 				 model==='line'?black_tmeme?(strVal.length==index?' grey-darken-3 ':'border-grey-a-1 grey-darken-3 '):`border-${color_tmeme}-b-3`:'',
 				 model==='box'?(black_tmeme?(strVal.length==index?'grey-darken-3 ':'border-grey-a-1 grey-darken-3 '):(strVal.length==index?'':`border-${color_tmeme}-a-1 `)):'',
 				 model==='fill'?black_tmeme?'grey-darken-3 ':bgColor:'',
-				 
+
 			 ]"
-			v-for="(item,index) in strLength" 
+			v-for="(item,index) in strLength"
 			:key="index"
 			:style="{
 				width:width>0?'auto':(100/strLength)+'%',
@@ -30,7 +30,7 @@
 					<text v-if="strVal[index]&&showVal"
 					class="text-weight-b text-size-lg"
 					:class="[
-						
+
 						black_tmeme?'text-white':`text-${textColor_tmeme}`
 					]"
 					>
@@ -132,11 +132,11 @@
 			},
 			color:{
 				type:String,
-				default:'primary' 
+				default:'primary'
 			},
 			textColor:{
 				type:String,
-				default:'grey-darken-3' 
+				default:'grey-darken-3'
 			},
 			keyboradModel:{
 				type:String,
@@ -186,7 +186,7 @@
 			// 	let val = this.strVal;
 			// 	let strlen = this.strLength - this.strVal.length;
 			// 	for(let i=0;i<strlen;i++){
-					
+
 			// 	}
 			// }
 		},
@@ -224,17 +224,17 @@
 	@keyframes easinOut {
 		0% {
 			opacity: 1;
-			
+
 		}
 
 		50% {
 			opacity: 0.4;
-			
+
 		}
 
 		100% {
 			opacity: 1;
-			
+
 		}
 	}
 </style>

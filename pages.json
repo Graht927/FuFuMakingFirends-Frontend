@@ -54,6 +54,60 @@
         "backgroundTextStyle": "light",
         "backgroundColor": "#000000"
       }
+    },
+    {
+      "path": "pages/message/msgInfo",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/Login",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/PhoneCodePage",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/Register",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/RegistryPwdPage",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/message/NoticePage",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
     }
   ],
   "globalStyle": {

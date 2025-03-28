@@ -12,7 +12,9 @@
       </view>
     </view>
 
-    匹配中心
+    <view class="content">
+      <!-- 匹配中心 -->
+    </view>
 
     <BottomNavBar :current-tab="1"/>
 

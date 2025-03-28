@@ -6,6 +6,13 @@ export default {
   },
   onShow: function () {
     console.log('App Show')
+    let item = uni.getStorageSync("fufu-app-token");
+    console.log(item)
+    if (!item){
+      uni.redirectTo({
+        url: 'pages/Login'
+      })
+    }
   },
   onHide: function () {
     console.log('App Hide')

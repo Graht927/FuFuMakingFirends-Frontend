@@ -63,10 +63,10 @@
 	 * @property {String}			url				跳转的页面路径
 	 * @property {String}			linkType		页面跳转的类型 ( 默认 navigateTo )
 	 * @property {Object}			customStyle		定义需要用到的外部样式
-	 * 
+	 *
 	 * @event {Function}			click			点击通告文字触发
 	 * @event {Function}			close			点击右侧关闭图标触发
-	 * @example <uv-notice-bar :more-icon="true" :list="list"></uv-notice-bar>
+	 * @example <uv-dynamicNotice-bar :more-icon="true" :list="list"></uv-dynamicNotice-bar>
 	 */
 	export default {
 		name: "uv-notice-bar",

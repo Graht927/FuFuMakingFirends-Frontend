@@ -1,10 +1,10 @@
 <template>
-<uni-shadow-root class="vant-notice-bar-index"><view v-if="show" :class="'custom-class '+(utils.bem('notice-bar', { withicon: mode, wrapable }))" :style="computed.rootStyle({ color, backgroundColor, background })" @click="onClick">
+<uni-shadow-root class="vant-notice-bar-index"><view v-if="show" :class="'custom-class '+(utils.bem('dynamicNotice-bar', { withicon: mode, wrapable }))" :style="computed.rootStyle({ color, backgroundColor, background })" @click="onClick">
   <van-icon v-if="leftIcon" :name="leftIcon" class="van-notice-bar__left-icon"></van-icon>
   <slot v-else name="left-icon"></slot>
 
   <view class="van-notice-bar__wrap">
-    <view :class="'van-notice-bar__content '+(scrollable === false && !wrapable ? 'van-ellipsis' : '')" :animation="animationData">
+    <view :class="'van-dynamicNotice-bar__content '+(scrollable === false && !wrapable ? 'van-ellipsis' : '')" :animation="animationData">
       {{ text }}
       <slot v-if="(!text)"></slot>
     </view>
@@ -22,7 +22,7 @@
 import VanIcon from '../icon/index.vue'
 global['__wxVueOptions'] = {components:{'van-icon': VanIcon}}
 
-global['__wxRoute'] = 'vant/notice-bar/index'
+global['__wxRoute'] = 'vant/dynamicNotice-bar/index'
 import { VantComponent } from '../common/component';
 import { getRect, requestAnimationFrame } from '../common/utils';
 VantComponent({
@@ -82,8 +82,8 @@ VantComponent({
         init() {
             requestAnimationFrame(() => {
                 Promise.all([
-                    getRect(this, '.van-notice-bar__content'),
-                    getRect(this, '.van-notice-bar__wrap'),
+                    getRect(this, '.van-dynamicNotice-bar__content'),
+                    getRect(this, '.van-dynamicNotice-bar__wrap'),
                 ]).then((rects) => {
                     const [contentRect, wrapRect] = rects;
                     const { speed, scrollable, delay } = this.data;
@@ -143,7 +143,7 @@ VantComponent({
         },
     },
 });
-export default global['__wxComponents']['vant/notice-bar/index']
+export default global['__wxComponents']['vant/dynamicNotice-bar/index']
 </script>
 <style platform="mp-weixin">
 @import '../common/index.css';.van-notice-bar{align-items:center;background-color:var(--notice-bar-background-color,#fffbe8);color:var(--notice-bar-text-color,#ed6a0c);display:flex;font-size:var(--notice-bar-font-size,14px);height:var(--notice-bar-height,40px);line-height:var(--notice-bar-line-height,24px);padding:var(--notice-bar-padding,0 16px)}.van-notice-bar--withicon{padding-right:40px;position:relative}.van-notice-bar--wrapable{height:auto;padding:var(--notice-bar-wrapable-padding,8px 16px)}.van-notice-bar--wrapable .van-notice-bar__wrap{height:auto}.van-notice-bar--wrapable .van-notice-bar__content{position:relative;white-space:normal}.van-notice-bar__left-icon{align-items:center;display:flex;margin-right:4px;vertical-align:middle}.van-notice-bar__left-icon,.van-notice-bar__right-icon{font-size:var(--notice-bar-icon-size,16px);min-width:var(--notice-bar-icon-min-width,22px)}.van-notice-bar__right-icon{position:absolute;right:15px;top:10px}.van-notice-bar__wrap{flex:1;height:var(--notice-bar-line-height,24px);overflow:hidden;position:relative}.van-notice-bar__content{position:absolute;white-space:nowrap}.van-notice-bar__content.van-ellipsis{max-width:100%}
