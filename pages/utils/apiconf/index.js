@@ -1,9 +1,9 @@
 // 全局请求封装
 // const base_url = 'http://服务器地址:2222/api/'
-export const host = '192.168.1.9';
+export const host = 'localhost';
 const base_url = 'http://'+host+':7777/'
 // 请求超出时间
-const timeout = 5000
+const timeout = 20000
 
 // 需要修改token，和根据实际修改请求头
 export default (params) => {

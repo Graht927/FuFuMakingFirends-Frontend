@@ -21,7 +21,7 @@ export const createSession = (data) => {
 }
 export const getSession = (sid) => {
     return request({
-        url: sessionPrefix + id,
+        url: sessionPrefix + sid,
         method: "GET",
     })
 }
@@ -72,9 +72,9 @@ export const getUserAllGroupChat = (uid) => {
     })
 }
 const messagePrefix = prefix+"message/"
-export const getMessageSessionAll = (sid,data) => {
+export const getMessageSessionAll = (data) => {
     return request({
-        url: messagePrefix +"session/"+ sid,
+        url: "fufu-socializing/v1/groupChat/messages/session",
         method: "POST",
         data: data
     })

@@ -3,7 +3,7 @@ import {VERSION} from "@/pages/utils/apiconf/config";
 
 const prefix = "fufu-socializing/" + VERSION + "/comments/"
 
-export const getParentCommentsByCid = (cid,data) => {
+export const getParentCommentsByCid = (dynamicId,data) => {
     /**
      * {
      *   "pageSize": 0,
@@ -11,8 +11,8 @@ export const getParentCommentsByCid = (cid,data) => {
      * }
      */
     return request({
-        url: prefix + `${cid}`,
-        method: "PostMapping",
+        url: prefix + `${dynamicId}`,
+        method: "POST",
         data
     })
 }
@@ -27,7 +27,7 @@ export const getCommentsByCid = (cid,data) => {
      */
     return request({
         url: prefix + `c/${cid}`,
-        method: "PostMapping",
+        method: "POST",
         data
     })
 }
@@ -42,7 +42,7 @@ export const addComments = (data) => {
      * }
      */
     return request({
-        url: prefix,
+        url: prefix.substring(0,prefix.length-1),
         method: "POST",
         data
     })

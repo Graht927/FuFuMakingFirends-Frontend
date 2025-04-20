@@ -84,6 +84,12 @@ export default {
   },
   computed: {},
   onShow() {
+    const userId = uni.getStorageSync("fufu-app-userId");
+      if (!userId) {
+        uni.redirectTo({
+          url: '/pages/Login'
+        });
+      }
     this.getNewMsg()
     this.timer = setInterval(() => {
       this.getNewMsg()
@@ -153,6 +159,7 @@ export default {
     async getData() {
       const userId = uni.getStorageSync("fufu-app-userId");
       if (!userId) {
+        clearInterval(this.timer)
         uni.redirectTo({
           url: '/pages/Login'
         });
@@ -161,6 +168,23 @@ export default {
       let tempList = [];
       try {
         const groupChatRes = await getUserAllGroupChat(userId);
+        if (groupChatRes.code === 20000 && groupChatRes.data.length > 0) {
+          const newData = groupChatRes.data.map(item => {
+            item.avatarUrl = BASEURL + item.avatarUrl;
+            if (item.lastMessageTime == null) {
+              item.lastMessageTime = '';
+            } else {
+              // 直接使用格式化后的时间
+              var strings = item.lastMessageTime.split("T")[1].split(".")[0].split(":");
+              item.lastMessageTime = strings[0] + ":" + strings[1];
+            }
+            if (item.lastMessageContent == null) {
+              item.lastMessageContent = '';
+            }
+            return item;
+          });
+          tempList.push(...newData);
+        }
         console.log(groupChatRes);
         const chatRes = await getUserAllChat(userId);
         if (chatRes.code === 20000 && chatRes.data.length > 0) {

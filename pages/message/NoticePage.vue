@@ -115,7 +115,9 @@ export default {
     },
     toDynamicInfoPage(did){
       //跳转动态详情页
-      alert(did)
+      uni.navigateTo({
+        url: '/pages/dynamicInfo/dynamicInfo?id=' + did
+      })
     },
     async init() {
       this.getNoticePage()

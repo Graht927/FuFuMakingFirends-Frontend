@@ -1,5 +1,8 @@
 <script>
 export default {
+  globalData: {
+    needRefreshGroupList: false
+  },
   onLaunch: function () {
     const configStyle = 'dark'
     uni.setStorageSync('configStyle', configStyle)

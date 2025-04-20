@@ -1,7 +1,7 @@
 <template>
   <view class="chat-container">
     <!-- 顶部导航栏 -->
-    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    <view class="status-bar" :style="{ height: 47 + 'px' }"></view>
     <view class="nav-bar">
       <view class="back-btn" @click="handleBack">
         <text class="back-icon">&#x2190;</text>
@@ -97,15 +97,11 @@ export default {
   onLoad(e) {
     // 重置 scrollTop
     this.scrollTop = 0;
-
     // 从本地获取消息
     this.getMessagesFromLocal();
     this.userId = uni.getStorageSync("fufu-app-userId")
     this.sessionId = e.sessionId
     this.type = e.type
-    console.log(e)
-    console.log(this.sessionId)
-    console.log(this.userId)
     if ("private" === this.type) {
       getSessionInfo(this.sessionId).then(res => {
         if (res.code === 20000) {
@@ -203,6 +199,7 @@ export default {
       })
     }
     if ("group" === this.type) {
+      console.log("群聊")
       getSession(this.sessionId).then(res => {
         if (res.code === 20000) {
           this.sessionInfo = res.data
@@ -210,9 +207,11 @@ export default {
           // 初始加载消息
           const data = {
             pageSize: this.pageSize,
-            pageNum: this.pageNum
+            pageNum: this.pageNum,
+            sessionId: this.sessionId
           }
-          getMessageSessionAll(this.sessionId, data).then(res => {
+          console.log(data)
+          getMessageSessionAll(data).then(res => {
             if (res.code === 20000) {
               if (res.data && res.data.length > 0) {
                 var temp = res.data;
@@ -245,6 +244,7 @@ export default {
         url: '/pages/Login'
       })
     } else this.userId = userId
+    console.log("开始初始化socket")
     // 初始化 WebSocket 连接
     this.initWebSocket();
     getUserInfoByUId(userId).then(res => {
@@ -338,15 +338,16 @@ export default {
     sendOnlineStatus() {
       console.log(this.socketTask)
       if (this.socketTask && this.socketTask.OPEN === 1) { // 1 表示 OPEN
-        this.socketTask.send({
-          data: "online:" + this.userId + ":" + this.channelId,
-          success: (e) => {
-            console.log('在线状态消息发送成功', e);
-          },
-          fail: (err) => {
-            console.error('在线状态消息发送失败:', err);
-          }
-        });
+          this.socketTask.send({
+            data: "online:" + this.userId + ":" + this.channelId,
+            success: (e) => {
+              console.log('在线状态消息发送成功', e);
+            },
+            fail: (err) => {
+              console.error('在线状态消息发送失败:', err);
+            }
+          });
+
       } else {
         console.warn('WebSocket 连接尚未建立，稍后重试');
       }
@@ -379,9 +380,13 @@ export default {
     sendMessage() {
       this.enter = false
       if (!this.inputMessage.trim()) return;
-
+      let msg = ""
       // 创建新消息
-      const msg = this.userId + ":" + 1 + ":" + this.sessionId + ":" + this.inputMessage;
+      if (this.type == "private") {
+        msg = this.userId + ":" + 1 + ":" + this.sessionId + ":" + this.inputMessage;
+      }else {
+        msg = this.userId + ":" + 2 + ":" + this.sessionId + ":" + this.inputMessage;
+      }
       const newMessage = {
         message: this.inputMessage,
         isSelf: true,

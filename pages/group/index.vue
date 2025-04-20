@@ -1,4 +1,3 @@
-template
 <template>
   <view class="discover">
     <!-- 顶部状态栏 -->
@@ -14,63 +13,61 @@ template
             <view class="line"></view>
           </view>
         </view>
-        <view class="calendar-icon">
+        <view class="calendar-icon" @click="showCalendarPicker">
           <tm-sheet :shadow="0">
-            <tm-calendar black @confirm="commitCalendar">
+            <tm-calendar black @confirm="commitCalendar" @input="this.hiddenTabBar = !this.hiddenTabBar">
               <view>
-                <image src="/static/icon/calendar.png" @click="closeTabBar"
+                <image src="/static/icon/calendar.png"
                        style="width: 2rem; height: 2rem;margin-left: 1rem;"/>
               </view>
             </tm-calendar>
+
           </tm-sheet>
         </view>
       </view>
     </view>
 
     <!-- 优化后的日期选择 -->
-    <scroll-view class="date-scroll">
-      <view class="date-list">
+    <view class="date-scroll">
+      <scroll-view scroll-x class="date-list">
         <view
             v-for="(item, index) in dates"
             :key="index"
             class="date-item"
             :class="{ active: activeDateIndex === index }"
-            @click="changeDate(index)">
+            @click="changeDate(index)"
+        >
           <text class="date">{{ item.date }}</text>
           <text class="day">{{ item.day }}</text>
         </view>
-      </view>
-    </scroll-view>
+      </scroll-view>
+    </view>
 
     <!-- 内容区域 -->
-    <scroll-view id="contentScrollView" class="content"
-                 style="max-height: 69vh;overflow-y: scroll" scroll-y="true"
-                 @scrolltolower="ReachBottom()" @scroll="handlerScroll"
-                 enable-back-to-top="true" :scroll-top="scrollTop">
-      <view v-if="teamList == null || teamList.length > 0">
-        <view v-for="event in teamList" :key="event.id">
-          <EventCard @goto="toInfoPage()" :event="event"/>
-        </view>
-      </view>
-      <view v-else class="no-data">
-        <image src="/static/icon/empty.png" mode="aspectFit" class="no-data-image"/>
-      </view>
+    <scroll-view scroll-y class="content" @scrolltolower="onScrollToBottom">
+      <view v-if="dates[activeDateIndex].events.length === 0" class="empty-state">
+    <image src="/static/icon/empty.png" class="empty-image" />
+  </view>
+      <EventCard
+        v-for="(event, i) in dates[activeDateIndex].events"
+        :key="i"
+        @goto="toInfo"
+        :event="event"
+      />
     </scroll-view>
 
-    <!-- 返回顶部按钮 -->
-    <view v-if="showBackToTop" class="back-to-top" @click="scrollToTop">
-      <image src="/static/icon/back-to-top.png" mode="aspectFit" class="back-to-top-icon"/>
-    </view>
-    <BottomNavBar :current-tab="2" v-if="showTabBar"/>
+    <!-- 底部导航栏 -->
+    <BottomNavBar v-if="hiddenTabBar" :current-tab="currentTab" @switch-tab="switchTab(2)"/>
   </view>
 </template>
-
 
 <script>
 import BottomNavBar from '@/components/BottomNavBar.vue'
 import EventCard from '@/components/EventCard.vue'
 import TmSheet from "@/tm-vuetify/components/tm-sheet/tm-sheet.vue";
 import TmCalendar from "@/tm-vuetify/components/tm-calendar/tm-calendar.vue";
+import {getTeamList} from "@/pages/utils/apis/organizeBureau/activity";
+import {BASEURL} from "@/pages/utils/apiconf/image-api";
 
 export default {
   components: {
@@ -82,157 +79,218 @@ export default {
   data() {
     return {
       statusBarHeight: 0,
-      currentTab: 0,
+      currentTab: 2,
       activeDateIndex: 0,
       dates: [],
       selectedDate: new Date(),
       calendar: '',
-      teamList: [],
-      showBackToTop: false,
-      showTabBar: true,
-      oldScrollTop : 0,
-      scrollTop: 0
+      hiddenTabBar: true,
+      page: 1,
+      pageSize: 10,
+      loading: false,
+      hasMore: true,
+      currentEvent: null
     }
   },
   onLoad() {
     const systemInfo = uni.getSystemInfoSync();
     this.statusBarHeight = systemInfo.statusBarHeight;
     this.generateWeekDates(this.selectedDate);
-    this.teamList = [
-      {
-        id: 1,
-        name: 'OT决战到天亮',
-        date: '2025-03-01',
-        image: 'https://ai-public.mastergo.com/ai/img_res/4fb989600a93c5945f94095e5b008728.jpg',
-        location: 'One Third PH-工体店',
-        price: '门票¥300/人 全场AA',
-        memberCount: '8/8 已加入',
-        avatars: [
-          'https://ai-public.mastergo.com/ai/img_res/bf8d2a39801d1dbd00b4c9aa1ee5350a.jpg',
-          'https://ai-public.com/ai/img_res/f9869b817159649afb67a5e66aeef17c.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/ad56cbdcd4396d4c0812662fcf842dbf.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/e1a277d3a3d12ce0bda6a569d1271103.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/c67f282f0d04c7a58fb612775e4811e0.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/c99f9a496d6b56b67a7dcafc873035df.jpg'
-        ]
-      }, {
-        id: 2,
-        name: 'OT决战到天亮',
-        date: '2025-03-01',
-        image: 'https://ai-public.mastergo.com/ai/img_res/4fb989600a93c5945f94095e5b008728.jpg',
-        location: 'One Third PH-工体店',
-        price: '门票¥300/人 全场AA',
-        memberCount: '8/8 已加入',
-        avatars: [
-          'https://ai-public.mastergo.com/ai/img_res/bf8d2a39801d1dbd00b4c9aa1ee5350a.jpg',
-          'https://ai-public.com/ai/img_res/f9869b817159649afb67a5e66aeef17c.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/ad56cbdcd4396d4c0812662fcf842dbf.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/e1a277d3a3d12ce0bda6a569d1271103.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/c67f282f0d04c7a58fb612775e4811e0.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/c99f9a496d6b56b67a7dcafc873035df.jpg'
-        ]
-      }, {
-        id: 3,
-        name: 'OT决战到天亮',
-        date: '2025-03-01',
-        image: 'https://ai-public.mastergo.com/ai/img_res/4fb989600a93c5945f94095e5b008728.jpg',
-        location: 'One Third PH-工体店',
-        price: '门票¥300/人 全场AA',
-        memberCount: '8/8 已加入',
-        avatars: [
-          'https://ai-public.mastergo.com/ai/img_res/bf8d2a39801d1dbd00b4c9aa1ee5350a.jpg',
-          'https://ai-public.com/ai/img_res/f9869b817159649afb67a5e66aeef17c.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/ad56cbdcd4396d4c0812662fcf842dbf.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/e1a277d3a3d12ce0bda6a569d1271103.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/c67f282f0d04c7a58fb612775e4811e0.jpg',
-          'https://ai-public.mastergo.com/ai/img_res/c99f9a496d6b56b67a7dcafc873035df.jpg'
-        ]
-      }
-    ]
+    this.fetchEventsForDate(this.selectedDate);
+    uni.$on('updateGroupList', this.handleUpdateGroupList);
+  },
+  onShow() {
+    const app = getApp();
+    if (app.globalData.needRefreshGroupList) {
+      this.handleUpdateGroupList();
+      app.globalData.needRefreshGroupList = false;
+    }
+  },
+  onUnload() {
+    uni.$off('updateGroupList', this.handleUpdateGroupList);
   },
   methods: {
-    handlerScroll(e) {
-      this.showBackToTop = e.detail.scrollTop > 3000;
-      this.oldScrollTop = e.detail.scrollTop;
-    },
-    closeTabBar() {
-      this.showTabBar = false;
-    },
-    toInfoPage(dataId) {
+    toInfo(e) {
       uni.navigateTo({
-        url: '/pages/group/GroupInfo?dataId=' + dataId
-      });
+        url: '/pages/group/GroupInfo?id=' + e
+      })
     },
     commitCalendar(e) {
-      this.showTabBar = true;
       console.log(e);
-      const year = e.year;
-      const month = e.month;
-      const day = e.day;
-      this.generateWeekDates(new Date(year, month - 1, day));
+      const year = e.year
+      const month = e.month
+      const day = e.day
+      this.generateWeekDates(new Date(year, month - 1, day))
+
     },
     switchTab(index) {
       this.currentTab = index;
     },
     changeDate(index) {
       this.activeDateIndex = index;
-      console.log(this.dates[index]);
+      this.page = 1;
+      this.hasMore = true;
+
+      // 清空当前日期的 events 数据
+      this.dates[index].events = [];
+      this.currentEvent = null; // 清空当前显示的活动
+
+      const selectedDate = this.dates[index].date; // 获取选中的日期
+      const formattedDate = this.parseDate(selectedDate); // 将 MM-DD 转换为 Date 对象
+      this.fetchEventsForDate(formattedDate); // 调用接口更新数据
+    },
+    showCalendarPicker() {
+      console.log('showCalendarPicker')
+      this.hiddenTabBar = false;
+      uni.showDatePicker({
+        mode: 'date',
+        currentDate: this.selectedDate,
+        success: (res) => {
+          this.hiddenTabBar = true;
+          this.selectedDate = new Date(res.date);
+          this.generateWeekDates(this.selectedDate);
+        },
+        fail: (err) => {
+          console.error('日期选择失败:', err);
+          uni.showToast({
+            title: '选择日期失败',
+            icon: 'none',
+            duration: 2000
+          });
+          this.hiddenTabBar = true;
+        }
+      });
+    },
+    async fetchEventsForDate(date) {
+      if (this.loading || !this.hasMore) return;
+      this.loading = true;
+      console.log(this.formatDate(date))
+      try {
+        let startTime;
+        const today = new Date();
+        const isToday = this.formatDate(date) === this.formatDate(today); // 判断是否为当天
+
+        if (isToday) {
+          startTime = new Date(); // 如果是当天，使用当前时间
+        } else {
+          startTime = new Date(date);
+          startTime.setHours(0, 0, 0, 0); // 如果不是当天，设置为选择日期的 0 点
+        }
+        // startTime.setHours(startTime.getHours() + 8); // 加上 8 小时偏移
+        console.log(startTime)
+
+        const res = await getTeamList({
+          startTime: startTime,
+          pageNum: this.page,
+          pageSize: this.pageSize
+        });
+        if (res.code === 20000) {
+          res.data.forEach(item => {
+            item.location = item.address;
+            item.image = BASEURL + item.teamImage;
+            item.date = item.startTime.split('.')[0].replace('T', ' ');
+            item.price = '门票¥' + item.deposit + '/人';
+            item.memberCount = item.currentNum + '/' + item.maxNum + ' 已加入';
+            item.avatars = item.teamUserInfos.map(user => BASEURL + user.avatarUrl);
+          });
+        }
+        const index = this.dates.findIndex(d => {
+          const formattedDate = this.formatDate(date).split('-').slice(1).join('-'); // 提取 MM-DD
+          return formattedDate === d.date;
+        });
+        if (index !== -1) {
+          if (this.page === 1) {
+            this.dates[index].events = res.data; // 如果是第一页，直接替换数据
+          } else {
+            this.dates[index].events = this.dates[index].events.concat(res.data); // 否则追加数据
+          }
+        }
+        this.hasMore = res.data.length >= this.pageSize; // 判断是否还有更多数据
+      } catch (error) {
+        console.error('获取事件数据失败:', error);
+        uni.showToast({
+          title: '获取数据失败',
+          icon: 'none',
+          duration: 2000
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+    formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     },
     generateWeekDates(date) {
       const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
       const selectedDate = date || new Date();
+      const currentDay = selectedDate.getDay();
 
-      // 生成所选周的日期
-      this.dates = Array.from({length: 7}).map((_, i) => {
+      // 生成所选周的日期，当前日期放在第一个位置
+      this.dates = Array.from({ length: 7 }).map((_, i) => {
         const date = new Date(selectedDate);
         date.setDate(selectedDate.getDate() + i);
-        // 使用本地日期格式
-        const currentDateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-
         return {
           date: `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
-          year: date.getFullYear(),
-          day: days[date.getDay()]
+          day: days[date.getDay()],
+          events: []
         };
       });
+
       // 默认选中当天
       this.activeDateIndex = 0;
+
+      // 只显示提示，不在这里调用 fetchEventsForDate
       uni.showToast({
-        title: '周数据已更新',
-        icon: 'success',
+        title: '数据更新中...',
+        icon: 'loading',
         duration: 1000
       });
     },
-    ReachBottom() {
-      console.log("触底了");
-      const newEvents = [];
-      for (let i = this.teamList.length; i < this.teamList.length + 10; i++) {
-        const id = this.teamList.length + i + 1;
-        newEvents.push({
-          id: id,
-          name: '新活动 ' + id,
-          date: '2025-03-01',
-          image: 'https://ai-public.mastergo.com/ai/img_res/4fb989600a93c5945f94095e5b008728.jpg',
-          location: 'One Third PH-工体店',
-          price: '门票¥300/人 全场AA',
-          memberCount: '8/8 已加入',
-          avatars: [
-            'https://ai-public.mastergo.com/ai/img_res/bf8d2a39801d1dbd00b4c9aa1ee5350a.jpg',
-            'https://ai-public.com/ai/img_res/f9869b817159649afb67a5e66aeef17c.jpg',
-            'https://ai-public.mastergo.com/ai/img_res/ad56cbdcd4396d4c0812662fcf842dbf.jpg',
-            'https://ai-public.mastergo.com/ai/img_res/e1a277d3a3d12ce0bda6a569d1271103.jpg',
-            'https://ai-public.mastergo.com/ai/img_res/c67f282f0d04c7a58fb612775e4811e0.jpg',
-            'https://ai-public.mastergo.com/ai/img_res/c99f9a496d6b56b67a7dcafc873035df.jpg'
-          ]
-        });
+    onScrollToBottom() {
+      if (this.hasMore && !this.loading) {
+        this.page += 1; // 增加页码
+        this.fetchEventsForDate(this.selectedDate); // 加载更多数据
       }
-      this.teamList = this.teamList.concat(newEvents); // 使用 concat 更新 teamList
     },
-    scrollToTop() {
-        this.scrollTop = this.oldScrollTop
-      this.$nextTick(()=>{
-        this.scrollTop = 0
-      })
+    parseDate(dateString) {
+      const [month, day] = dateString.split('-');
+      const year = new Date().getFullYear(); // 使用当前年份
+      return new Date(year, month - 1, day); // 返回 Date 对象
+    },
+    async handleUpdateGroupList() {
+      try {
+        uni.showLoading({
+          title: '刷新数据中...'
+        });
+        await this.initData();
+      } catch (error) {
+        console.error('更新数据失败:', error);
+        uni.showToast({
+          title: '更新失败，请重试',
+          icon: 'none'
+        });
+      } finally {
+        uni.hideLoading();
+      }
+    },
+    async initData() {
+      // 重置分页数据
+      this.page = 1;
+      this.hasMore = true;
+
+      // 如果当前有选中的日期索引，清空该日期的事件数据
+      if (this.dates[this.activeDateIndex]) {
+        this.dates[this.activeDateIndex].events = [];
+      }
+
+      // 重新生成日期数据
+      this.generateWeekDates(this.selectedDate);
+
+      // 确保在生成日期后立即获取数据
+      await this.fetchEventsForDate(this.selectedDate);
     }
   }
 }
@@ -240,13 +298,17 @@ export default {
 
 <style lang="scss">
 .discover {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #1E1E1E 0%, #141414 100%);
   display: flex;
   flex-direction: column;
-  position: relative;
+  height: 100vh;
+  background: linear-gradient(180deg, #1E1E1E 0%, #141414 100%);
+
+  .status-bar {
+    flex-shrink: 0;
+  }
 
   .header {
+    flex-shrink: 0;
     padding: 20rpx 30rpx;
     display: flex;
     flex-direction: column;
@@ -286,90 +348,59 @@ export default {
     flex-shrink: 0;
     height: 120rpx;
     width: 100%;
-  }
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12rpx;
+    margin: 20rpx 0;
 
-  .date-list {
-    display: flex;
-    padding: 0 20rpx;
+    .date-list {
+      display: flex;
+      flex-direction: row;
+      padding: 0 20rpx;
+      gap: 10rpx;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
   }
 
   .date-item {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 120rpx;
     height: 120rpx;
-  }
-
-  .date {
-    font-size: 14px;
-    color: #999;
-  }
-
-  .day {
-    font-size: 12px;
-    color: #666;
-    margin-top: 8rpx;
-  }
-
-  .date-item.active {
-    background: rgba(255, 255, 255, 0.1);
     border-radius: 12rpx;
-  }
+    transition: background 0.3s ease;
 
-  .active .date,
-  .active .day {
-    color: #fff;
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .date {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .day {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8rpx;
+    }
+
+    &.active {
+      background: rgba(255, 255, 255, 0.1);
+
+      .date,
+      .day {
+        color: #fff;
+      }
+    }
   }
 
   .content {
     flex: 1;
     overflow: auto;
-    padding-bottom: 120rpx;
-  }
-
-  .bottom-nav-bar-wrapper {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-  }
-
-  .no-data {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-top: 100rpx;
-
-    .no-data-image {
-      width: 90vw;
-      height: 50vh;
-      opacity: 1;
-      filter: brightness(1.2);
-    }
-  }
-
-  .back-to-top {
-    position: fixed;
-    right: 20rpx;
-    bottom: 18vh; // 避免与底部导航栏重叠
-    width: 80rpx;
-    height: 80rpx;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-
-    .back-to-top-icon {
-      width: 40rpx;
-      height: 40rpx;
-    }
+    margin-bottom: 10vh;
   }
 }
 
@@ -385,7 +416,21 @@ export default {
   padding: 0;
 }
 
-.data-v-e6d2011a {
-  z-index: 999;
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80%;
+  padding: 20rpx;
+
+  .empty-image {
+    margin: auto;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    color: #999;
+  }
 }
 </style>

@@ -108,6 +108,60 @@
         "backgroundTextStyle": "light",
         "backgroundColor": "#000000"
       }
+    },
+    {
+      "path": "pages/createDynamic/createDynamic",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/createActivity/createActivity",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/dynamicInfo/dynamicInfo",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/group/MemberList",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/user/FansList",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
+    },
+    {
+      "path": "pages/user/FocusList",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
     }
   ],
   "globalStyle": {

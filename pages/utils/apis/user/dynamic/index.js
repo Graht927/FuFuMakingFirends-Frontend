@@ -20,7 +20,7 @@ export const getDynamicsByUserId = (data) => {
 }
 export const getDynamicsByUid = (id) => {
     return request({
-        url: prefix + `user/${id}`,
+        url: prefix + `${id}`,
         method: "GET"
     })
 }
@@ -34,7 +34,7 @@ export const createDynamic = (data) => {
      * }
      */
     return request({
-        url: prefix,
+        url: "fufu-user/" + VERSION + "/dynamics",
         method: "POST",
         data
     })

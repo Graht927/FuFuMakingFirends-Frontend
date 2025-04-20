@@ -4,7 +4,7 @@ import {VERSION} from "@/pages/utils/apiconf/config";
 const prefix = "fufu-socializing/" + VERSION + "/focus/"
 
 
-export const getFocusByUid = (data) => {
+export const getFocus = (data) => {
     /**
      * {
      *   "pageSize": 0,
@@ -42,7 +42,7 @@ export const addFocus = (data) => {
      * }
      */
     return request({
-        url: prefix,
+        url: "fufu-socializing/" + VERSION + "/focus",
         method: "POST",
         data
     })
@@ -84,5 +84,17 @@ export const isFocus = (data) => {
         url: prefix + "isFocus",
         method: "POST",
         data
+    })
+}
+export const getFansCount = () => {
+    return request({
+        url: prefix + "fansNum",
+        method: "GET",
+    })
+}
+export const getFocusCount = () => {
+    return request({
+        url: prefix + "focusNum",
+        method: "GET",
     })
 }

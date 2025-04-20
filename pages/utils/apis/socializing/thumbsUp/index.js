@@ -25,7 +25,7 @@ export const addThumbsUp = (data) => {
      * }
      */
     return request({
-        url: prefix,
+        url: prefix.substring(0,prefix.length-1),
         method: "POST",
         data
     })
