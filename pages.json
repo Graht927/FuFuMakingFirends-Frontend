@@ -162,6 +162,15 @@
         "backgroundTextStyle": "light",
         "backgroundColor": "#000000"
       }
+    },
+    {
+      "path": "pages/user/EditProfile",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false,
+        "backgroundTextStyle": "light",
+        "backgroundColor": "#000000"
+      }
     }
   ],
   "globalStyle": {

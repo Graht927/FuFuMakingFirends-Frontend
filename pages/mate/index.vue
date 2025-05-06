@@ -120,7 +120,7 @@ export default {
   methods: {
     async getData() {
       if (!this.hasMore) {
-        return;
+        this.pageNum = 1
       }
 
       const res = await getMate({

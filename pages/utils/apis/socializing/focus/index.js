@@ -98,3 +98,10 @@ export const getFocusCount = () => {
         method: "GET",
     })
 }
+export const unfollowUser = (data) =>{
+    return request({
+        url:  "fufu-socializing/" + VERSION + "/focus",
+        method: "DELETE",
+        data
+    })
+}

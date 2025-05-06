@@ -4,7 +4,7 @@
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
 
     <!-- 标题栏 -->
-    <view class="header">
+    <view class="header" style="margin-top: 0 !important;">
       <view style="display:flex;">
         <view>
           <text class="title">GROUP</text>
@@ -21,7 +21,6 @@
                        style="width: 2rem; height: 2rem;margin-left: 1rem;"/>
               </view>
             </tm-calendar>
-
           </tm-sheet>
         </view>
       </view>
@@ -68,6 +67,7 @@ import TmSheet from "@/tm-vuetify/components/tm-sheet/tm-sheet.vue";
 import TmCalendar from "@/tm-vuetify/components/tm-calendar/tm-calendar.vue";
 import {getTeamList} from "@/pages/utils/apis/organizeBureau/activity";
 import {BASEURL} from "@/pages/utils/apiconf/image-api";
+import Login from "@/pages/Login.vue";
 
 export default {
   components: {
@@ -86,7 +86,7 @@ export default {
       calendar: '',
       hiddenTabBar: true,
       page: 1,
-      pageSize: 10,
+      pageSize: 6,
       loading: false,
       hasMore: true,
       currentEvent: null
@@ -115,12 +115,15 @@ export default {
         url: '/pages/group/GroupInfo?id=' + e
       })
     },
-    commitCalendar(e) {
+     commitCalendar(e) {
       console.log(e);
       const year = e.year
       const month = e.month
       const day = e.day
       this.generateWeekDates(new Date(year, month - 1, day))
+       this.page = 1
+       this.hasMore = true
+       this.fetchEventsForDate(new Date(year, month - 1, day))
 
     },
     switchTab(index) {
@@ -162,7 +165,10 @@ export default {
       });
     },
     async fetchEventsForDate(date) {
-      if (this.loading || !this.hasMore) return;
+      this.selectedDate = date;
+      if (this.loading || !this.hasMore){
+        return;
+      }
       this.loading = true;
       console.log(this.formatDate(date))
       try {
@@ -178,7 +184,6 @@ export default {
         }
         // startTime.setHours(startTime.getHours() + 8); // 加上 8 小时偏移
         console.log(startTime)
-
         const res = await getTeamList({
           startTime: startTime,
           pageNum: this.page,
@@ -194,6 +199,7 @@ export default {
             item.avatars = item.teamUserInfos.map(user => BASEURL + user.avatarUrl);
           });
         }
+        this.page++;
         const index = this.dates.findIndex(d => {
           const formattedDate = this.formatDate(date).split('-').slice(1).join('-'); // 提取 MM-DD
           return formattedDate === d.date;
@@ -205,7 +211,9 @@ export default {
             this.dates[index].events = this.dates[index].events.concat(res.data); // 否则追加数据
           }
         }
-        this.hasMore = res.data.length >= this.pageSize; // 判断是否还有更多数据
+        this.hasMore = res.data.length != 0; // 判断是否还有更多数据
+        console.log(this.hasMore)
+        this.loading = false;
       } catch (error) {
         console.error('获取事件数据失败:', error);
         uni.showToast({
@@ -213,7 +221,6 @@ export default {
           icon: 'none',
           duration: 2000
         });
-      } finally {
         this.loading = false;
       }
     },
@@ -250,8 +257,11 @@ export default {
       });
     },
     onScrollToBottom() {
+      console.log('onScrollToBottom');
+      console.log(this.hasMore)
+      console.log(this.loading)
       if (this.hasMore && !this.loading) {
-        this.page += 1; // 增加页码
+        console.log(1)
         this.fetchEventsForDate(this.selectedDate); // 加载更多数据
       }
     },

@@ -32,6 +32,20 @@ export default (params) => {
 				const res = response
 				// 根据返回的状态码做出对应的操作
 				if (res.statusCode == 200) {
+					console.log(res.data)
+					if (res.data.code == 500 && res.data.msg.includes("token 无效")) {
+						uni.showToast({
+							title: '登录已过期，请重新登录',
+							duration: 2000,
+						})
+						uni.clearStorageSync()
+						setTimeout(() => {
+							uni.redirectTo({
+							url: "/pages/Login",
+						})
+						})
+
+					}
 					resolve(res.data);
 				} else {
 					uni.clearStorageSync()
@@ -50,6 +64,8 @@ export default (params) => {
 								},
 							});
 							break;
+						case 500:
+
 						case 404:
 							uni.showToast({
 								title: '请求地址不存在...',

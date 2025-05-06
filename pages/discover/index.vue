@@ -14,7 +14,9 @@
     <!-- 内容区域 -->
     <scroll-view class="content"
                  scroll-y="true"
-                 @scrolltolower="onBottom">
+                 :refresher-enabled="true"
+                 :refresher-triggered="isRefreshing"
+                 @refresherrefresh="onRefresh">
               <!-- 轮播图 -->
       <view class="banner-container">
               <swiper class="banner-swiper"
@@ -36,6 +38,14 @@
           :list="list"
           @likeClick="handleItemClick"
           ref="waterfall"/>
+          
+      <!-- 加载更多提示 -->
+      <view class="loading-more" v-if="isLoading">
+        <text>加载中...</text>
+      </view>
+      <view class="no-more" v-else-if="!hasMore && list.length > 0">
+        <text>没有更多了</text>
+      </view>
     </scroll-view>
 
     <BottomNavBar :current-tab="0"/>
@@ -102,6 +112,7 @@
     flex: 1;
     margin-top: calc(var(--status-bar-height) + 88rpx);
     height: calc(100vh - var(--status-bar-height) - 88rpx - 100rpx);
+    padding-bottom: 10vh;
 
     .banner-container {
       padding: 20rpx;
@@ -118,6 +129,13 @@
       }
       }
     }
+  }
+
+  .loading-more, .no-more {
+    text-align: center;
+    padding: 20rpx 0;
+    color: #999;
+    font-size: 24rpx;
   }
 }
 </style>
@@ -145,7 +163,10 @@ export default {
       isLoggedIn: false,
       list: [],
       pageNum: 1,
-      pageSize: 20,
+      pageSize: 8,
+      hasMore: true,
+      isRefreshing: false,
+      isLoading: false,
       banners: [
         {
           image: '/static/banner/banner1.jpg',
@@ -164,7 +185,6 @@ export default {
     }
   },
   onLoad() {
-    this.getMockData();
     const systemInfo = uni.getSystemInfoSync();
     this.statusBarHeight = systemInfo.statusBarHeight;
     this.screenWidth = systemInfo.windowWidth;
@@ -174,10 +194,118 @@ export default {
       left: this.screenWidth - 60
     };
     this.isLoggedIn = uni.getStorageSync('fufu-app-userId') !== null;
+    // 首次加载数据
+    this.loadMore();
+  },
+  // 添加触底加载生命周期函数
+  onReachBottom() {
+    console.log('触发触底加载');
+    console.log('hasMore:', this.hasMore);
+    console.log('isLoading:', this.isLoading);
+    console.log('当前页码:', this.pageNum);
+    console.log('当前列表长度:', this.list.length);
+
+    if (!this.hasMore || this.isLoading) {
+      console.log('不满足加载条件，返回');
+      return;
+    }
+
+    this.isLoading = true;
+    this.loadMore().finally(() => {
+      this.isLoading = false;
+    });
   },
   methods: {
-    onBottom() {
-      this.getMockData();
+    async onRefresh() {
+      this.isRefreshing = true;
+      this.pageNum = 1;
+      this.hasMore = true;
+      try {
+        await this.loadMore();
+      } finally {
+        this.isRefreshing = false;
+      }
+    },
+    async loadMore() {
+      try {
+        const res = await this.fetchList();
+        console.log('获取到的原始数据:', res);
+        if (res.code === 20000) {
+          const newList = res.data || [];
+          console.log('处理前的列表数据:', newList);
+          // 处理数据格式
+          const formattedList = newList.map(item => {
+            if (item.model === 'group') {
+              return {
+                ...item,
+                id: item.id,
+                size: 30,
+                image: this.BASEURL + item.teamImage,
+                model: "group",
+                title: item.name,
+                distance: item.address,
+                userAvatars: (item.teamUserInfos || []).slice(0, 3).map(avatar => this.BASEURL + avatar.avatarUrl),
+                userCount: item.maxNum,
+                currentCount: item.currentNum,
+                group: {
+                  ...item,
+                  coverImage: this.BASEURL + item.teamImage
+                }
+              };
+            } else {
+              return {
+                ...item,
+                id: item.id,
+                size: 36,
+                image: this.BASEURL + item.image,
+                model: "dynamic",
+                title: item.title,
+                isLike: item.isLike || false,
+                author: {
+                  avatar: this.BASEURL + item.author.avatar,
+                  name: item.author.nickname
+                }
+              };
+            }
+          });
+          console.log('格式化后的列表数据:', formattedList);
+
+          if (this.pageNum === 1) {
+            this.list = formattedList;
+          } else {
+            this.list = [...this.list, ...formattedList];
+          }
+          console.log('更新后的完整列表:', this.list);
+          this.hasMore = formattedList.length !== 0;
+          this.pageNum++;
+          
+          // 强制更新瀑布流组件
+          this.$nextTick(() => {
+            if (this.$refs.waterfall) {
+              this.$refs.waterfall.distributeItems(this.list);
+            }
+          });
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error);
+        uni.showToast({
+          title: '加载失败',
+          icon: 'none'
+        });
+      }
+    },
+    async fetchList() {
+      try {
+        const res = await getDiscover({
+          pageNum: this.pageNum,
+          pageSize: this.pageSize
+        });
+        console.log('API返回数据:', res);
+        return res;
+      } catch (error) {
+        console.error('API请求失败:', error);
+        throw error;
+      }
     },
     onTouchStart(e) {
       this.startTouch = {
@@ -209,7 +337,7 @@ export default {
       if (index !== -1) {
         // 先更新本地状态，实现即时反馈
         this.list[index].isLike = !this.list[index].isLike;
-        
+
         try {
           // 在后台异步处理点赞/取消点赞请求
           if (this.list[index].isLike) {
@@ -233,46 +361,6 @@ export default {
           });
         }
       }
-    },
-    async getMockData() {
-      const res = await getDiscover({
-        pageNum: this.pageNum,
-        pageSize: this.pageSize
-      });
-      const data = res.data.map(item => {
-            if (item.model === 'group') return {
-              ...item,
-              id: item.id,
-              size: 30,
-              image: this.BASEURL + item.teamImage,
-              model: "group",
-              title: item.name,
-              distance: item.address,
-              userAvatars: (item.teamUserInfos || []).slice(0, 3).map(avatar => this.BASEURL + avatar.avatarUrl),
-              userCount: item.maxNum,
-              currentCount: item.currentNum,
-              group: {
-                ...item,
-                coverImage: this.BASEURL + item.teamImage
-              }
-            }
-            else  return {
-              ...item,
-              id: item.id,
-              size: 36,
-              image: this.BASEURL + item.image,
-              model: "dynamic",
-              title: item.title,
-              isLike: item.isLike || false,
-              author: {
-                avatar: this.BASEURL + item.author.avatar,
-                name: item.author.nickname
-              }
-            }
-          }
-      );
-      this.pageNum++
-      this.list = this.list.concat(data);
     },
     goToLogin() {
       uni.navigateTo({

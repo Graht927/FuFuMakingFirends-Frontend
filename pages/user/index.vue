@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="description">
-                  {{ userInfo.description || '这个人很懒，什么都没写~' }}
+                  {{ userInfo.profile || '这个人很懒，什么都没写~' }}
                 </div>
               </div>
             </div>
@@ -267,6 +267,14 @@ export default {
       focusCount: 0,
     }
   },
+  onShow (){
+     getFansCount().then(res => {
+      this.focusCount = res.data;
+    })
+    getFocusCount().then(res => {
+      this.fansCount = res.data;
+    })
+  },
   onLoad() {
     this.getUserInfo();
     if (this.clickTag === '动态') {
@@ -278,14 +286,6 @@ export default {
     this.statusBarHeight = systemInfo.statusBarHeight;
     this.screenWidth = systemInfo.windowWidth;
     this.screenHeight = systemInfo.windowHeight;
-    getFansCount().then(res => {
-      this.fansCount = res.data;
-    })
-    getFocusCount().then(res => {
-      this.focusCount = res.data;
-    })
-  },
-  onShow() {
   },
   computed: {},
   mounted() {
@@ -599,7 +599,7 @@ export default {
 
     handleEdit() {
       uni.navigateTo({
-        url: '/pages/editProfile/editProfile'
+        url: '/pages/user/EditProfile'
       })
     },
     async handleTagChange(tag) {

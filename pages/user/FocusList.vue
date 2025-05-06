@@ -10,7 +10,14 @@
       <text class="nav-title">关注列表</text>
     </view>
     <!-- 内容区域 -->
-    <scroll-view scroll-y class="content-area">
+    <scroll-view 
+      scroll-y 
+      class="content-area"
+      @scrolltolower="loadMore"
+      :refresher-enabled="true"
+      :refresher-triggered="isRefreshing"
+      @refresherrefresh="onRefresh"
+    >
       <view v-for="(member, index) in members" :key="index" class="member-item">
         <!-- 左侧头像 -->
         <image class="member-avatar" :src="member.avatarUrl" mode="aspectFill"/>
@@ -20,8 +27,13 @@
           <text class="member-location">{{ member.addr }}</text>
         </view>
         <!-- 右侧操作按钮 -->
-        <view class="member-action" @click="goUserInfo(members.id)">
-          <text class="action-text">查看详情</text>
+        <view class="action-container">
+          <view class="member-action" @click="createPrivateSession(member.id)">
+            <text class="action-text">私聊</text>
+          </view>
+          <view class="unfollow-action" @click="unfollow(member.id)">
+            <text class="action-text">取消关注</text>
+          </view>
         </view>
       </view>
     </scroll-view>
@@ -31,7 +43,8 @@
 <script>
 import {getActivityById} from "@/pages/utils/apis/organizeBureau/activity";
 import {BASEURL} from "@/pages/utils/apiconf/image-api";
-import {getFans, getFocus} from "@/pages/utils/apis/socializing/focus";
+import {getFans, getFocus, unfollowUser} from "@/pages/utils/apis/socializing/focus";
+import {createSessionP} from "@/pages/utils/apis/socializing/privateChat";
 
 export default {
   data() {
@@ -41,7 +54,9 @@ export default {
       pageSize: 10,
       pageNum: 1,
       userId: "",
-      focusId: ""
+      focusId: "",
+      isRefreshing: false,
+      hasMore: true
     };
   },
   onLoad(dataId) {
@@ -51,26 +66,92 @@ export default {
     this.fetchMembers();
   },
   methods: {
-    async fetchMembers() {
-      const res = await getFocus({
-        pageSize: this.pageSize,
-        pageNum: this.pageNum,
-        userId: this.userId,
-        focusUid: this.focusId
-      });
-      if (res.code === 20000) {
-        this.members = res.data.map(user => ({
-          avatarUrl: BASEURL + user.avatarUrl,
-          nickname: user.nickname,
-          addr: user.addr
-        }));
-        this.pageNum++
+    async createPrivateSession(uid) {
+      const data = {
+        userId1: this.userId,
+        userId2: uid
       }
+      const res = createSessionP(data);
+      if (res.code === 20000) {
+        uni.switchTab({
+          url: '/pages/message/index'
+        })
+      }
+    },
+    async unfollow(uid) {
+      try {
+        const res = await unfollowUser({
+          userId: this.userId,
+          focusUserId: uid
+        });
+        if (res.code === 20000) {
+          uni.showToast({
+            title: '取消关注成功',
+            icon: 'success'
+          });
+          // 从列表中移除该用户
+          this.members = this.members.filter(member => member.id !== uid);
+        } else {
+          uni.showToast({
+            title: '取消关注失败',
+            icon: 'none'
+          });
+        }
+      } catch (error) {
+        uni.showToast({
+          title: '操作失败',
+          icon: 'none'
+        });
+      }
+    },
+    async fetchMembers() {
+      try {
+        const res = await getFocus({
+          pageSize: this.pageSize,
+          pageNum: this.pageNum,
+          userId: this.userId,
+          focusUid: this.focusId
+        });
+        if (res.code === 20000) {
+          const newMembers = res.data.map(user => ({
+            avatarUrl: BASEURL + user.avatarUrl,
+            nickname: user.nickname,
+            addr: user.addr,
+            id: user.id
+          }));
+          
+          if (this.pageNum === 1) {
+            this.members = newMembers;
+          } else {
+            this.members = [...this.members, ...newMembers];
+          }
+          
+          // 判断是否还有更多数据
+          this.hasMore = newMembers.length === this.pageSize;
+          this.pageNum++;
+        }
+      } catch (error) {
+        uni.showToast({
+          title: '加载失败',
+          icon: 'none'
+        });
+      }
+    },
+    async loadMore() {
+      if (!this.hasMore) return;
+      await this.fetchMembers();
+    },
+    async onRefresh() {
+      this.isRefreshing = true;
+      this.pageNum = 1;
+      this.hasMore = true;
+      await this.fetchMembers();
+      this.isRefreshing = false;
     },
     back() {
       uni.navigateBack();
     },
-    goUserInfo(userId){
+    goUserInfo(userId) {
       //todo 跳转到用户详情页面
     }
   }
@@ -94,7 +175,7 @@ page {
 .custom-nav-bar {
   display: flex;
   align-items: center;
-  padding:50rpx 20rpx 20rpx;
+  padding: 50rpx 20rpx 20rpx;
   background-color: #1E1E1E; /* 导航栏背景设置为深灰色 */
   border-bottom: 1rpx solid #333; /* 导航栏底部边框 */
   height: 100rpx; /* 设置导航栏高度 */
@@ -121,6 +202,7 @@ page {
 .content-area {
   width: 96%;
   margin: 0 auto;
+  height: calc(100vh - 100rpx - var(--status-bar-height));
   overflow-y: auto; /* 允许内容区域滚动 */
 }
 
@@ -160,14 +242,27 @@ page {
   color: #999; /* 成员地址文字颜色为灰色 */
 }
 
-/* 右侧操作按钮 */
-.member-action {
+/* 右侧操作按钮容器 */
+.action-container {
+  display: flex;
+  gap: 10rpx;
+}
+
+/* 操作按钮通用样式 */
+.member-action, .unfollow-action {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8rpx 14rpx;
-  background-color: #007aff; /* 操作按钮背景设置为蓝色 */
   border-radius: 8rpx;
+}
+
+.member-action {
+  background-color: #007aff; /* 私聊按钮背景设置为蓝色 */
+}
+
+.unfollow-action {
+  background-color: #ff3b30; /* 取消关注按钮背景设置为红色 */
 }
 
 .action-text {

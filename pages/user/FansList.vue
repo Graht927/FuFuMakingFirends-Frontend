@@ -20,8 +20,8 @@
           <text class="member-location">{{ member.addr }}</text>
         </view>
         <!-- 右侧操作按钮 -->
-        <view class="member-action" @click="goUserInfo(members.id)">
-          <text class="action-text">查看详情</text>
+        <view class="member-action" @click="createPrivateSession(member.id)">
+          <text class="action-text">私聊</text>
         </view>
       </view>
     </scroll-view>
@@ -31,7 +31,8 @@
 <script>
 import {getActivityById} from "@/pages/utils/apis/organizeBureau/activity";
 import {BASEURL} from "@/pages/utils/apiconf/image-api";
-import {getFans} from "@/pages/utils/apis/socializing/focus";
+import {getFans, getFocus} from "@/pages/utils/apis/socializing/focus";
+import {createSessionP} from "@/pages/utils/apis/socializing/privateChat";
 
 export default {
   data() {
@@ -51,6 +52,19 @@ export default {
     this.fetchMembers();
   },
   methods: {
+    async createPrivateSession(uid) {
+      console.log(uid)
+      const data = {
+        userId1: this.userId,
+        userId2: uid
+      }
+      const res = createSessionP(data);
+      if (res.code === 20000){
+        uni.switchTab({
+          url: '/pages/message/index'
+        })
+      }
+    },
     async fetchMembers() {
       const res = await getFans({
         pageSize: this.pageSize,
@@ -62,10 +76,12 @@ export default {
         this.members = res.data.map(user => ({
           avatarUrl: BASEURL + user.avatarUrl,
           nickname: user.nickname,
-          addr: user.addr
+          addr: user.addr,
+          id:user.id
         }));
         this.pageNum++
       }
+
     },
     back() {
       uni.navigateBack();

@@ -23,3 +23,10 @@ export const getMessageList = (sid,data) => {
         data:data
     })
 }
+export const createSessionP = (data) => {
+    return request({
+        url: prefix + "session",
+        method: "POST",
+        data:data
+    })
+}

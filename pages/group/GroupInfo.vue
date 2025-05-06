@@ -133,7 +133,7 @@ export default {
           addr: res.data.leaderInfo.addr
         },
         price: {
-          label: '此局为男生AA局',
+          label: '门票信息',
           value: '¥ ' + res.data.deposit + ' 元/人'
         }
       }
